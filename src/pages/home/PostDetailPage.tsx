@@ -118,7 +118,7 @@ export default function PostDetailPage() {
               Unable to load this post
             </h1>
 
-            <p className="mt-2 break-words text-sm text-gray-600 dark:text-gray-300">
+            <p className="mt-2 wrap-break-words text-sm text-gray-600 dark:text-gray-300">
               {error}
             </p>
 
