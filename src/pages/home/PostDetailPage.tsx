@@ -36,6 +36,21 @@ export default function PostDetailPage() {
 
         if (!cancelled) {
           setPost(result);
+          
+          PostsAPI.incrementViewCount(id)
+            .then((viewResult) => {
+              if (!cancelled && viewResult.recorded) {
+                setPost((previous) =>
+                  previous
+                    ? { ...previous, viewCount: viewResult.viewCount }
+                    : previous,
+                );
+              }
+            })
+            .catch((err: unknown) => {
+              // View tracking must never break the page.
+              console.error("View tracking failed:", err);
+            });
         }
       } catch (err: unknown) {
         if (!cancelled) {

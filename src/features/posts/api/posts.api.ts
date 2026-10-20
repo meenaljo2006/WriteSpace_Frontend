@@ -98,4 +98,19 @@ export const PostsAPI = {
 
     return response.data.data;
   },
+
+  /**
+   * Record a view for a post. Backend dedupes per user/post for 1 hour,
+   * so calling this repeatedly on mount is safe — only the first call
+   * within the dedup window will actually increment the counter.
+  */
+  incrementViewCount: async (
+    postId: string,
+  ): Promise<{ viewCount: number; recorded: boolean }> => {
+    const response = await api.post<
+      BackendResponse<{ viewCount: number; recorded: boolean }>
+    >(`/posts/${postId}/view`);
+
+    return response.data.data;
+  }
 };
