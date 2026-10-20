@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart, MessageSquare, UserPlus, Sparkles, Repeat, CheckCheck, Loader2, Bell } from "lucide-react";
+import { Heart, MessageSquare, UserPlus, Sparkles, Repeat, CheckCheck, Loader2, Bell, AtSign, AlertTriangle, Mail, ShieldAlert, KeyRound } from "lucide-react";
 import { NotificationsAPI } from "@/features/notifications/notifications.api";
 import type { AppNotification, NotificationType } from "@/types/api.types";
 import { useTheme } from "@/app/providers/ThemeProvider";
@@ -90,7 +90,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 
   const getIcon = (type: NotificationType) => {
     switch (type) {
-      case "LIKE":
+      case "REACTION":
         return <Heart size={16} color="#ef4444" fill="#ef4444" />;
       case "COMMENT":
         return <MessageSquare size={16} color="#3b82f6" fill="#3b82f6" />;
@@ -98,9 +98,21 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
         return <UserPlus size={16} color="#10b981" />;
       case "SHARE":
         return <Repeat size={16} color="#8b5cf6" />;
+      case "MENTION":
+        return <AtSign size={16} color="#ec4899" />;
       case "WELCOME":
       case "SYSTEM":
         return <Sparkles size={16} color="#f59e0b" />;
+      case "REPORT":
+        return <AlertTriangle size={16} color="#ef4444" />;
+      case "MESSAGE":
+        return <Mail size={16} color="#0ea5e9" />;
+      case "LOGIN_ALERT":
+      case "ACCOUNT_STATUS":
+        return <ShieldAlert size={16} color="#f97316" />;
+      case "PASSWORD_CHANGED":
+      case "PASSWORD_RESET":
+        return <KeyRound size={16} color="#6366f1" />;
       default:
         return <Bell size={16} color={mutedText} />;
     }

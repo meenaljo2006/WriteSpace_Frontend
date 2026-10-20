@@ -166,13 +166,20 @@ export interface ResetPasswordPayload {
   password: string;
 }
 
-export type NotificationType = 
-  | "LIKE" 
-  | "COMMENT" 
-  | "FOLLOW" 
-  | "SHARE" 
-  | "WELCOME" 
-  | "SYSTEM";
+export type NotificationType =
+  | "WELCOME"
+  | "REACTION"
+  | "COMMENT"
+  | "FOLLOW"
+  | "SHARE"
+  | "MENTION"
+  | "REPORT"
+  | "MESSAGE"
+  | "SYSTEM"
+  | "LOGIN_ALERT"
+  | "PASSWORD_CHANGED"
+  | "PASSWORD_RESET"
+  | "ACCOUNT_STATUS";
 
 export interface NotificationActor {
   id: string;
