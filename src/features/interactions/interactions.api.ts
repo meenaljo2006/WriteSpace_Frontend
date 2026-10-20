@@ -3,6 +3,7 @@ import type {
   CommentData,
   PaginatedCommentsResponse,
   PaginatedRepliesResponse,
+  Post,
 } from "@/types/api.types";
 
 interface BackendResponse<T> {
@@ -53,7 +54,7 @@ export interface ShareResult {
 }
 
 export interface SavedPostsResponse {
-  posts: unknown[];
+  posts: Post[];
   nextCursor: string | null;
 }
 

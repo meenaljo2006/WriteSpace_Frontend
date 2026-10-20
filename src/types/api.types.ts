@@ -92,6 +92,7 @@ export interface Post {
   };
 
   isLikedByMe: boolean;
+  isSavedByMe?: boolean;
 
   status: "draft" | "scheduled" | "published" | "archived" | "trash";
 

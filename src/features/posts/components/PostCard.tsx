@@ -22,6 +22,13 @@ interface PostCardProps {
   viewMode?: "feed" | "detail";
   onEdit?: (post: Post) => void;
   onPostDeleted?: (postId: string) => void;
+
+  /**
+   * Called when the user unsaves a post from a context where saves are
+   * the primary list (e.g. the saved-posts page). Not called on the
+   * regular feed — feed items stay visible regardless of save state.
+  */
+  onUnsaved?: (postId: string) => void;
 }
 
 export default function PostCard({
@@ -32,6 +39,7 @@ export default function PostCard({
   viewMode = "feed",
   onEdit,
   onPostDeleted,
+  onUnsaved,
 }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
@@ -61,7 +69,7 @@ export default function PostCard({
     authorId,
     initialIsLiked: post.isLikedByMe ?? false,
     initialIsFollowing: post.author?.isFollowingByMe ?? initialIsFollowing,
-    initialIsSaved,
+    initialIsSaved: post.isSavedByMe ?? initialIsSaved,
   });
 
   useEffect(() => {
@@ -99,7 +107,14 @@ export default function PostCard({
     setActionError(null);
 
     try {
-      await toggleSave();
+      const isSavedNow = await toggleSave();
+
+      // When the card lives inside a "saved posts" list, an unsave
+      // should remove it from that list. The parent decides whether
+      // to actually filter it out.
+      if (!isSavedNow && onUnsaved) {
+        onUnsaved(post.id);
+      }
     } catch {
       setActionError("Couldn't update your saved posts. Please try again.");
     }

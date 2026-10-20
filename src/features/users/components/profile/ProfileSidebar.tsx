@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { User, Bookmark, Settings, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { UsersAPI } from "@/features/users/api/users.api";
@@ -44,10 +43,6 @@ const ProfileSidebar: React.FC = () => {
   const textColor = isDark ? "#f1f5f9" : "#0f172a";
   const mutedText = isDark ? "#94a3b8" : "#64748b";
   const accentColor = "#6366f1";
-
-  const handleComingSoon = () => {
-    toast.info("Saved Items feature coming!", { theme: isDark ? "dark" : "light" });
-  };
 
   const cardStyle: React.CSSProperties = {
     backgroundColor: cardBg,
@@ -151,11 +146,11 @@ const ProfileSidebar: React.FC = () => {
         </div>
 
         <div style={{ paddingTop: "12px", display: "flex", flexDirection: "column", gap: "10px", textAlign: "left" }}>
-          {/* Changed Link to div and added onClick handler */}
-          <div onClick={handleComingSoon} style={linkRowStyle} onMouseOver={(e) => e.currentTarget.style.color = textColor} onMouseOut={(e) => e.currentTarget.style.color = mutedText}>
+          
+          <Link to="/saved" style={linkRowStyle} onMouseOver={(e) => e.currentTarget.style.color = textColor} onMouseOut={(e) => e.currentTarget.style.color = mutedText}>
             <Bookmark size={16} />
             <span>Saved items</span>
-          </div>
+          </Link>
           <Link to="/settings" style={linkRowStyle} onMouseOver={(e) => e.currentTarget.style.color = textColor} onMouseOut={(e) => e.currentTarget.style.color = mutedText}>
             <Settings size={16} />
             <span>Profile Settings</span>
