@@ -12,6 +12,7 @@ import HomePage from "./pages/home/HomePage";
 import PostDetailPage from "./pages/home/PostDetailPage";
 import SettingsPage from "./pages/settings/SettingsPage";
 import PublicProfileLayout from "./components/layout/PublicProfileLayout";
+import SearchPage from "./pages/search/SearchPage";
 
 // Context & Providers
 import { ThemeProvider, useTheme } from "@/app/providers/ThemeProvider";
@@ -89,6 +90,7 @@ const AppContent: React.FC = () => {
           <Route path="/home" element={<HomePage />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/post/:id" element={<PostDetailPage />} />
+          <Route path="/search" element={<SearchPage />} />
           <Route path="/messages" element={<div className="p-8 text-gray-900 dark:text-white">Messages</div>} />
           <Route path="/notifications" element={<div className="p-8 text-gray-900 dark:text-white">Notifications</div>} />
           <Route path="/settings" element={<SettingsPage />} />
