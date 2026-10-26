@@ -130,6 +130,8 @@ export interface CommentData {
   likeCount?: number;
   replyCount: number;
   isEdited: boolean;
+  status: "visible" | "shadowbanned";
+  sentiment: "positive" | "negative" | "neutral";
   createdAt: string;
   updatedAt: string;
 

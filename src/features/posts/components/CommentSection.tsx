@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { LoaderCircle, Send, User } from "lucide-react";
+import { LoaderCircle, Send, User} from "lucide-react";
 import { toast } from "react-toastify";
 
 import { useAuth } from "@/app/providers/AuthProvider";
@@ -23,6 +23,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 
   const [commentText, setCommentText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
 
   // Prevent duplicate pagination requests and ignore stale fetch results.
   const loadingMoreRef = useRef(false);
@@ -103,20 +104,29 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 
   const handleAddTopLevelComment = async () => {
     const content = commentText.trim();
-
-    if (isSubmitting) return;
-
+    if (isSubmittingRef.current) return; 
     if (!authUser) {
       toast.info("Please sign in to comment");
       return;
     }
 
     if (!content) return;
+    isSubmittingRef.current = true;
 
     setIsSubmitting(true);
 
     try {
       const newComment = await InteractionsAPI.addComment(postId, content);
+
+      if (newComment.status === "shadowbanned") {
+        toast.warning(
+          <div>
+            <strong>Professional Language Required</strong>
+            <p className="text-sm mt-1">Your comment was posted but hidden from the public feed due to inappropriate language or spam.</p>
+          </div>,
+          { autoClose: 6000 }
+        );
+      }
 
       setComments((previous) => [
         newComment,
@@ -128,6 +138,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
       console.error("Failed to post comment", error);
       toast.error("Failed to post comment");
     } finally {
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -144,6 +155,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
         className="flex min-w-0 items-center gap-2 sm:gap-3"
         onSubmit={(event) => {
           event.preventDefault();
+          if (isSubmitting) return;
           void handleAddTopLevelComment();
         }}
       >

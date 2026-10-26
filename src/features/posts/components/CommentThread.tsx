@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  AlertTriangle,
   Check,
   Heart,
   LoaderCircle,
@@ -337,9 +338,19 @@ export default function CommentThread({
               </div>
             </form>
           ) : (
-            <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6 text-slate-700 dark:text-slate-200">
-              {currentContent}
-            </p>
+            <div className="relative">
+              {/* SHADOWBAN WARNING LOGIC */}
+              {comment.status === "shadowbanned" && (
+                <div className="flex items-center gap-1.5 text-xs text-red-500 mb-1 font-semibold">
+                  <AlertTriangle size={12} />
+                  <span>Hidden from public (Shadowbanned)</span>
+                </div>
+              )}
+              
+              <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6 text-slate-700 dark:text-slate-200">
+                {currentContent}
+              </p>
+            </div>
           )}
         </div>
 
