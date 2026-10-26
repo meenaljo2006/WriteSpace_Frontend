@@ -233,6 +233,7 @@ export default function PostCard({
           <CommentSection
             postId={post.id}
             postAuthorUsername={post.author?.username ?? ""}
+            postAuthorId={post.author?.id ?? ""}
           />
         </div>
       )}

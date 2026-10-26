@@ -19,6 +19,7 @@ import { InteractionsAPI } from "@/features/interactions/interactions.api";
 interface CommentThreadProps {
   comment: CommentData;
   postId: string;
+  postAuthorId: string;
   depth?: number;
   onDelete?: (commentId: string) => void;
 }
@@ -29,6 +30,7 @@ const actionButtonClass =
 export default function CommentThread({
   comment,
   postId,
+  postAuthorId,
   depth = 0,
   onDelete,
 }: CommentThreadProps) {
@@ -48,6 +50,9 @@ export default function CommentThread({
   const isMobile = windowWidth < 480;
   const maxDepth = isMobile ? 3 : 5;
   const isOwner = authUser?.id === comment.author.id;
+   const isPostAuthor = authUser?.id === postAuthorId;
+
+    const canDelete = isOwner || isPostAuthor;
 
   const [isLiked, setIsLiked] = useState(
     comment.isReacted === true && comment.reactionType === "like",
@@ -385,7 +390,7 @@ export default function CommentThread({
             </button>
           )}
 
-          {isOwner && !isEditing && (
+          {canDelete && !isEditing && (
             <>
               <button
                 type="button"
@@ -402,7 +407,7 @@ export default function CommentThread({
               <button
                 type="button"
                 onClick={() => void handleDeleteSelf()}
-                className="inline-flex items-center gap-1 rounded-md py-1 text-xs font-semibold text-red-600 transition-colors hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:text-red-400 dark:hover:text-red-300"
+                className={actionButtonClass}
               >
                 <Trash2 size={iconSize} aria-hidden="true" />
                 Delete
@@ -477,6 +482,7 @@ export default function CommentThread({
                 key={reply.id}
                 comment={reply}
                 postId={postId}
+                postAuthorId={postAuthorId}
                 depth={depth + 1}
                 onDelete={handleChildDeleted}
               />

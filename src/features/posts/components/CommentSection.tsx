@@ -11,9 +11,10 @@ import CommentThread from "./CommentThread";
 interface CommentSectionProps {
   postId: string;
   postAuthorUsername: string;
+  postAuthorId: string;
 }
 
-export default function CommentSection({ postId }: CommentSectionProps) {
+export default function CommentSection({ postId, postAuthorId }: CommentSectionProps) {
   const { user: authUser } = useAuth();
 
   const [comments, setComments] = useState<CommentData[]>([]);
@@ -222,6 +223,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                 key={comment.id}
                 comment={comment}
                 postId={postId}
+                postAuthorId={postAuthorId}
                 onDelete={handleTopLevelDelete}
               />
             ))}
