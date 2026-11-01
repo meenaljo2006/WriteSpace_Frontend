@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Send, User } from "lucide-react";
+import { Send, User,CheckCheck ,Check} from "lucide-react";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import { ChatAPI } from "../api/chat.api";
 import { getSocket } from "@/lib/socket";
@@ -33,15 +33,13 @@ export default function ChatWindow({ conversation, currentUserId }: Props) {
     return () => { cancelled = true; };
   }, [conversation.id]);
 
-  // 2. REAL-TIME SOCKET LOGIC (Naya code)
+  // 2. REAL-TIME SOCKET LOGIC
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
 
-    // Room join karo taaki is conversation ke messages milein
     socket.emit("join_conversation", conversation.id);
 
-    // Jab naya message aaye, toh state update karo
     const handleReceiveMessage = (newMsg: ChatMessage) => {
       setMessages((prev) => {
         // Prevent duplicates
@@ -52,7 +50,7 @@ export default function ChatWindow({ conversation, currentUserId }: Props) {
 
     socket.on("receive_message", handleReceiveMessage);
 
-    // Cleanup: Room leave karo aur listener hatao
+    // Cleanup
     return () => {
       socket.emit("leave_conversation", conversation.id);
       socket.off("receive_message", handleReceiveMessage);
@@ -78,8 +76,6 @@ export default function ChatWindow({ conversation, currentUserId }: Props) {
         content: input.trim(),
         recipientId: conversation.otherUser.id,
       });
-      
-      // Input turant clear karo (Optimistic UI)
       setInput("");
       setIsSending(false);
     } else {
@@ -93,6 +89,43 @@ export default function ChatWindow({ conversation, currentUserId }: Props) {
         .finally(() => setIsSending(false));
     }
   };
+
+  //  REAL-TIME SOCKET LOGIC
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    socket.emit("join_conversation", conversation.id);
+
+    const handleReceiveMessage = (newMsg: ChatMessage) => {
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === newMsg.id)) return prev;
+        return [...prev, newMsg];
+      });
+      
+      if (newMsg.senderId !== currentUserId) {
+        socket.emit("mark_read", conversation.id);
+      }
+    };
+
+    const handleMessagesMarkedRead = (data: { conversationId: string }) => {
+      if (data.conversationId === conversation.id) {
+        setMessages((prev) =>
+          prev.map((m) => ({ ...m, isRead: true }))
+        );
+      }
+    };
+
+    socket.on("receive_message", handleReceiveMessage);
+    socket.on("messages_marked_read", handleMessagesMarkedRead);
+    socket.emit("mark_read", conversation.id);
+
+    return () => {
+      socket.emit("leave_conversation", conversation.id);
+      socket.off("receive_message", handleReceiveMessage);
+      socket.off("messages_marked_read", handleMessagesMarkedRead);
+    };
+  }, [conversation.id]);
 
   return (
     <div className="flex h-full flex-col">
@@ -130,6 +163,17 @@ export default function ChatWindow({ conversation, currentUserId }: Props) {
                   }`}
                 >
                   {msg.content}
+                  {isMine && (
+                    <span className="ml-2 inline-block align-middle">
+                      {msg.isRead ? (
+                        // Read -> Blue Double Tick
+                        <CheckCheck size={14} className="text-blue-300" />
+                      ) : (
+                        // send -> Grey Single Tick
+                        <Check size={14} className="text-slate-400" />
+                      )}
+                    </span>
+                  )}
                 </div>
               </div>
             );

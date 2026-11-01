@@ -26,6 +26,7 @@ export default function ConversationList({ conversations, activeId, onSelect, cu
       {conversations.map((conv) => {
         const isActive = activeId === conv.id;
         const isMyMessage = conv.lastMessage?.senderId === currentUserId;
+        const hasUnread = conv.unreadCount > 0;
 
         return (
           <div
@@ -44,23 +45,33 @@ export default function ConversationList({ conversations, activeId, onSelect, cu
                 <User className="h-full w-full p-2 text-slate-400" />
               )}
             </div>
+            
             <div className="min-w-0 flex-1">
               <div className="flex justify-between">
-                <span className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                <span className={`truncate text-sm ${hasUnread ? "font-bold text-blue-600 dark:text-blue-400" : "font-semibold text-slate-900 dark:text-slate-100"}`}>
                   {conv.otherUser.fullname}
                 </span>
+                
                 {conv.lastMessage && (
-                  <span className="text-xs text-slate-500">
+                  <span className={`text-xs ${hasUnread ? "text-blue-600 font-bold" : "text-slate-500"}`}>
                     {new Date(conv.lastMessage.createdAt).toLocaleDateString()}
                   </span>
                 )}
               </div>
-              <p className="truncate text-xs text-slate-500 mt-1">
+
+              <p className={`truncate text-xs mt-1 ${hasUnread ? "font-semibold text-slate-800 dark:text-slate-200" : "text-slate-500"}`}>
                 {conv.lastMessage
                   ? `${isMyMessage ? "You: " : ""}${conv.lastMessage.content}`
                   : "Started a conversation"}
               </p>
             </div>
+            
+            {/*Unread Count Badge */}
+            {hasUnread && (
+              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+                {conv.unreadCount}
+              </div>
+            )}
           </div>
         );
       })}

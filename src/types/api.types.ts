@@ -230,6 +230,7 @@ export interface ConversationData {
   lastMessageAt: string;
   otherUser: ChatParticipant;
   lastMessage: LastMessage | null;
+  unreadCount: number;
 }
 
 export interface ChatMessage {

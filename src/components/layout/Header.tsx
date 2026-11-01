@@ -20,6 +20,8 @@ import { toast } from "react-toastify";
 import { NotificationsAPI } from "@/features/notifications/notifications.api";
 import NotificationDropdown from "./NotificationDropdown";
 import SearchComponent from "./SearchComponent";
+import { getSocket } from "@/lib/socket"; 
+import { ChatAPI } from "@/features/chat/api/chat.api"; 
 
 const Header: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -38,6 +40,7 @@ const Header: React.FC = () => {
   // Notification States
   const [isNotificationOpen, setIsNotificationOpen] = useState<boolean>(false);
   const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState<number>(0);
 
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const notificationMenuRef = useRef<HTMLDivElement>(null);
@@ -91,6 +94,40 @@ const Header: React.FC = () => {
     const interval = setInterval(fetchUnreadCount, 60000);
     return () => clearInterval(interval);
   }, [user]);
+
+    // Fetch initial unread message count & listen to socket
+  useEffect(() => {
+    if (!user) return;
+
+    // Initial count via REST API
+    ChatAPI.getConversations().then((convs) => {
+      const total = convs.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
+      setUnreadMessagesCount(total);
+    }).catch(console.error);
+
+    // Socket listeners for real-time badge
+    const socket = getSocket();
+    if (socket) {
+      const handleNewMessage = () => {
+        if (!location.pathname.startsWith("/messages")) {
+          setUnreadMessagesCount((prev) => prev + 1);
+        }
+      };
+      
+      socket.on("new_message_notification", handleNewMessage);
+      
+      return () => {
+        socket.off("new_message_notification", handleNewMessage);
+      };
+    }
+  }, [user, location.pathname]);
+
+  // Clear badge when navigating to /messages
+  useEffect(() => {
+    if (location.pathname.startsWith("/messages")) {
+      setUnreadMessagesCount(0);
+    }
+  }, [location.pathname]);
 
   const isMobile = windowWidth < 768;
   const textColor = isDark ? "#f1f5f9" : "#0f172a";
@@ -292,7 +329,23 @@ const Header: React.FC = () => {
           </Link>
           
           <Link to="/messages" style={getNavItemStyle("/messages")}>
-            <MessageSquare size={22} />
+            <div style={{ position: "relative" }}>
+              <MessageSquare size={22} />
+              {unreadMessagesCount > 0 && (
+                <div style={{
+                  position: "absolute", top: "-4px", right: "-6px", 
+                  backgroundColor: "#ef4444", color: "white", 
+                  fontSize: "10px", fontWeight: "bold", 
+                  minWidth: "16px", height: "16px", 
+                  borderRadius: "8px", display: "flex", 
+                  alignItems: "center", justifyContent: "center",
+                  border: `2px solid ${isDark ? "#0f172a" : "#fff"}`,
+                  padding: "0 4px"
+                }}>
+                  {unreadMessagesCount > 99 ? "99+" : unreadMessagesCount}
+                </div>
+              )}
+            </div>
             <span>Message</span>
           </Link>
 
