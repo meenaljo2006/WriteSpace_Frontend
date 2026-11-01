@@ -17,6 +17,7 @@ import SavedPostsPage from "./pages/saved/SavedPostsPage";
 import NotificationsPage from "./pages/notifications/NotificationsPage";
 import MessagesPage from "./pages/messages/MessagesPage";
 
+
 // Context & Providers
 import { ThemeProvider, useTheme } from "@/app/providers/ThemeProvider";
 import { AuthProvider, useAuth } from "@/app/providers/AuthProvider";
@@ -95,10 +96,9 @@ const AppContent: React.FC = () => {
           <Route path="/post/:id" element={<PostDetailPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/saved" element={<SavedPostsPage />} />
-          <Route path="/messages" element={<div className="p-8 text-gray-900 dark:text-white">Messages</div>} />
+          <Route path="/messages" element={<MessagesPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/messages" element={<MessagesPage />} />
         </Route>
         
         {/* Fallback Route */}

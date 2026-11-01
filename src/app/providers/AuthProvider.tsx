@@ -3,6 +3,7 @@ import type { User } from "@/types/api.types";
 import { UsersAPI } from "@/features/users/api/users.api";
 import { useNavigate } from "react-router-dom";
 import { AuthAPI } from "@/features/auth/api/auth.api";
+import { connectSocket, disconnectSocket } from "@/lib/socket";
 
 interface AuthContextType {
   user: User | null;
@@ -116,6 +117,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
+
+  // Socket Connection Logic
+  useEffect(() => {
+    if (accessToken) {
+      connectSocket(accessToken);
+    } else {
+      disconnectSocket();
+    }
+    
+    return () => {
+      // Disconnect when AuthProvider unmounts
+      disconnectSocket();
+    };
+  }, [accessToken]);
 
   return (
     <AuthContext.Provider value={{

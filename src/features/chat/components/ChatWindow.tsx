@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Send, User } from "lucide-react";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import { ChatAPI } from "../api/chat.api";
+import { getSocket } from "@/lib/socket";
 import type { ChatMessage, ConversationData } from "@/types/api.types";
 
 interface Props {
@@ -18,7 +19,7 @@ export default function ChatWindow({ conversation, currentUserId }: Props) {
   const [isSending, setIsSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Fetch initial messages
+  // 1. Fetch initial messages from DB
   useEffect(() => {
     let cancelled = false;
     setIsLoading(true);
@@ -32,22 +33,64 @@ export default function ChatWindow({ conversation, currentUserId }: Props) {
     return () => { cancelled = true; };
   }, [conversation.id]);
 
-  // Scroll to bottom when messages change
+  // 2. REAL-TIME SOCKET LOGIC (Naya code)
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    // Room join karo taaki is conversation ke messages milein
+    socket.emit("join_conversation", conversation.id);
+
+    // Jab naya message aaye, toh state update karo
+    const handleReceiveMessage = (newMsg: ChatMessage) => {
+      setMessages((prev) => {
+        // Prevent duplicates
+        if (prev.some((m) => m.id === newMsg.id)) return prev;
+        return [...prev, newMsg];
+      });
+    };
+
+    socket.on("receive_message", handleReceiveMessage);
+
+    // Cleanup: Room leave karo aur listener hatao
+    return () => {
+      socket.emit("leave_conversation", conversation.id);
+      socket.off("receive_message", handleReceiveMessage);
+    };
+  }, [conversation.id]);
+
+  // 3. Scroll to bottom on new message
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = async () => {
+  // 4. Send Message via Socket (Updated handleSend)
+  const handleSend = () => {
     if (!input.trim() || isSending) return;
     setIsSending(true);
-    try {
-      const newMsg = await ChatAPI.sendMessage(conversation.id, input.trim());
-      setMessages((prev) => [...prev, newMsg]);
+    
+    const socket = getSocket();
+
+    if (socket && socket.connected) {
+      // Real-time send
+      socket.emit("send_message", {
+        conversationId: conversation.id,
+        content: input.trim(),
+        recipientId: conversation.otherUser.id,
+      });
+      
+      // Input turant clear karo (Optimistic UI)
       setInput("");
-    } catch (error) {
-      console.error("Failed to send message", error);
-    } finally {
       setIsSending(false);
+    } else {
+      // Fallback to REST API if socket is disconnected
+      ChatAPI.sendMessage(conversation.id, input.trim())
+        .then((newMsg) => {
+          setMessages((prev) => [...prev, newMsg]);
+          setInput("");
+        })
+        .catch(console.error)
+        .finally(() => setIsSending(false));
     }
   };
 
