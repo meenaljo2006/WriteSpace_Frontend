@@ -291,10 +291,10 @@ const Header: React.FC = () => {
             <span>Home</span>
           </Link>
           
-          <button onClick={handleMessagesClick} style={getNavItemStyle("/messages")}>
+          <Link to="/messages" style={getNavItemStyle("/messages")}>
             <MessageSquare size={22} />
             <span>Message</span>
-          </button>
+          </Link>
 
           <div ref={notificationMenuRef} style={{ position: "relative" }}>
             <button 
@@ -738,8 +738,9 @@ const Header: React.FC = () => {
             <span>Home</span>
           </Link>
           
-          <button
-            onClick={() => { handleMessagesClick(); setIsMobileMenuOpen(false); }}
+          <Link
+            to="/messages"
+            onClick={() => setIsMobileMenuOpen(false)}
             style={{
               ...getNavItemStyle("/messages"),
               flexDirection: "row",
@@ -749,7 +750,7 @@ const Header: React.FC = () => {
           >
             <MessageSquare size={20} />
             <span>Messages</span>
-          </button>
+          </Link>
           
           <button
             onClick={() => setIsNotificationOpen(!isNotificationOpen)}

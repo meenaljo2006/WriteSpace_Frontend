@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { MapPin, Calendar, Edit3, Globe, Mail, Plus, X, Share2, Link as LinkIcon } from "lucide-react";
+import { MapPin, Calendar, Edit3, Globe, Mail, Plus, X, Share2, Link as LinkIcon, MessageSquare } from "lucide-react";
 import { FaGithub, FaTwitter, FaLinkedin, FaInstagram, FaYoutube, FaFacebook } from "react-icons/fa";
 import { FaXTwitter, FaLinkedinIn, FaFacebookF, FaWhatsapp, FaRedditAlien } from "react-icons/fa6";
 import { SiLeetcode, SiCodeforces, SiGeeksforgeeks } from "react-icons/si";
+import { useNavigate } from "react-router-dom";
+import { ChatAPI } from "@/features/chat/api/chat.api";
 import { toast } from "react-toastify";
 
 import type { User } from "@/types/api.types";
@@ -19,6 +21,7 @@ interface ProfileIdentityProps {
 
 const ProfileIdentity: React.FC<ProfileIdentityProps> = ({ profileUser, isOwnProfile, isFollowing, onToggleFollow, onOpenEditModal }) => {
   const { theme } = useTheme();
+  const navigate = useNavigate();
   
   const [isBioModalOpen, setIsBioModalOpen] = useState<boolean>(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false); // 🔥 NEW State
@@ -67,6 +70,15 @@ const ProfileIdentity: React.FC<ProfileIdentityProps> = ({ profileUser, isOwnPro
     }
   };
 
+    const handleMessageClick = async () => {
+    try {
+      const { id } = await ChatAPI.startConversation(profileUser.id);
+      navigate(`/messages?id=${id}`);
+    } catch (error) {
+      toast.error("Failed to start conversation");
+    }
+  };
+
   return (
     <>
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -104,12 +116,22 @@ const ProfileIdentity: React.FC<ProfileIdentityProps> = ({ profileUser, isOwnPro
                     <Edit3 size={14} /> Edit Profile
                   </button>
                 ) : (
-                  <button 
-                    onClick={onToggleFollow} 
-                    style={{ padding: "6px 16px", borderRadius: "20px", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer", transition: "all 0.2s", display: "flex", alignItems: "center", gap: "6px", backgroundColor: isFollowing ? "transparent" : accentColor, border: isFollowing ? `1px solid ${borderColor}` : "none", color: isFollowing ? textColor : "#ffffff" }}
-                  >
-                    {isFollowing ? "Following" : <><Plus size={14} /> Follow</>}
-                  </button>
+
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <button 
+                      onClick={handleMessageClick} 
+                      style={{ padding: "6px 16px", borderRadius: "20px", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer", transition: "all 0.2s", display: "flex", alignItems: "center", gap: "6px", backgroundColor: "transparent", border: `1px solid ${borderColor}`, color: textColor }}
+                    >
+                      <MessageSquare size={14} /> Message
+                    </button>
+
+                    <button 
+                      onClick={onToggleFollow} 
+                      style={{ padding: "6px 16px", borderRadius: "20px", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer", transition: "all 0.2s", display: "flex", alignItems: "center", gap: "6px", backgroundColor: isFollowing ? "transparent" : accentColor, border: isFollowing ? `1px solid ${borderColor}` : "none", color: isFollowing ? textColor : "#ffffff" }}
+                    >
+                      {isFollowing ? "Following" : <><Plus size={14} /> Follow</>}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

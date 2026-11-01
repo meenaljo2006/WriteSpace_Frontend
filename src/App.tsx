@@ -15,6 +15,7 @@ import PublicProfileLayout from "./components/layout/PublicProfileLayout";
 import SearchPage from "./pages/search/SearchPage";
 import SavedPostsPage from "./pages/saved/SavedPostsPage";
 import NotificationsPage from "./pages/notifications/NotificationsPage";
+import MessagesPage from "./pages/messages/MessagesPage";
 
 // Context & Providers
 import { ThemeProvider, useTheme } from "@/app/providers/ThemeProvider";
@@ -97,6 +98,7 @@ const AppContent: React.FC = () => {
           <Route path="/messages" element={<div className="p-8 text-gray-900 dark:text-white">Messages</div>} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/messages" element={<MessagesPage />} />
         </Route>
         
         {/* Fallback Route */}

@@ -210,3 +210,33 @@ export interface UpdatePasswordPayload {
   currentPassword: string;
   newPassword: string;
 }
+
+// --- CHAT TYPES ---
+export interface ChatParticipant {
+  id: string;
+  fullname: string;
+  username: string;
+  profileImageUrl: string | null;
+}
+
+export interface LastMessage {
+  content: string;
+  createdAt: string;
+  senderId: string;
+}
+
+export interface ConversationData {
+  id: string;
+  lastMessageAt: string;
+  otherUser: ChatParticipant;
+  lastMessage: LastMessage | null;
+}
+
+export interface ChatMessage {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  content: string;
+  isRead: boolean;
+  createdAt: string;
+}
