@@ -17,6 +17,12 @@ import SavedPostsPage from "./pages/saved/SavedPostsPage";
 import NotificationsPage from "./pages/notifications/NotificationsPage";
 import MessagesPage from "./pages/messages/MessagesPage";
 
+// --- NAYE LANDING PAGE IMPORTS ---
+import PublicLayout from "./features/landing/layout/PublicLayout";
+import Landing from "./features/landing/pages/Landing"; // apne path ke hisaab se check kar lena
+import Features from "./features/landing/pages/Features";
+import Community from "./features/landing/pages/Community";
+// --------------------------------
 
 // Context & Providers
 import { ThemeProvider, useTheme } from "@/app/providers/ThemeProvider";
@@ -43,6 +49,7 @@ const PublicRoute: React.FC<RouteProps> = ({ children }) => {
     );
   }
   
+  // Agar user pehle se login hai, to use landing page ya login page se hata kar /home bhej do
   return isAuthenticated ? <Navigate to="/home" replace /> : <>{children}</>;
 };
 
@@ -60,19 +67,24 @@ const AppContent: React.FC = () => {
       />
       
       <Routes>
+        {/* --- NAYA: PUBLIC LANDING PAGES (Navbar + Footer ke sath) --- */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
+          <Route path="/features" element={<PublicRoute><Features /></PublicRoute>} />
+          <Route path="/community" element={<PublicRoute><Community /></PublicRoute>} />
+        </Route>
+
         {/* --- Unified Public Auth Routes --- */}
         <Route 
           path="/login" 
           element={<PublicRoute><AuthPage initialMode="login" /></PublicRoute>} 
         />
         
-        {/* Directly render AuthPage in register mode instead of redirecting */}
         <Route 
           path="/register" 
           element={<PublicRoute><AuthPage initialMode="register" /></PublicRoute>} 
         />
         
-        {/* Password Recovery Routes */}
         <Route 
           path="/forgot-password" 
           element={<PublicRoute><AuthPage initialMode="forgot" /></PublicRoute>} 
@@ -82,7 +94,6 @@ const AppContent: React.FC = () => {
           element={<PublicRoute><AuthPage initialMode="reset" /></PublicRoute>} 
         />
         
-        {/* OAuth Callback (Must remain outside PublicRoute/ProtectedLayout wrappers) */}
         <Route path="/auth/success" element={<OAuthSuccess />} />
 
         {/* --- Completely Protected App Area --- */}
@@ -101,8 +112,8 @@ const AppContent: React.FC = () => {
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
         
-        {/* Fallback Route */}
-        <Route path="*" element={<Navigate to="/home" replace />} />
+        {/* Fallback Route: Ab random URL pe /home nahi, balki Landing page (/) pe bhejenge */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
   );
