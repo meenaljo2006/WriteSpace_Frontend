@@ -1,67 +1,94 @@
-import React from 'react';
-import { PenTool, MessageSquare, UserCircle } from 'lucide-react';
+import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
-const AuthBranding: React.FC = () => {
+interface BrandingProps {
+  mode?: string;
+  onToggleForm?: () => void;
+}
+
+export default function AuthBranding({ mode = "login", onToggleForm }: BrandingProps) {
+  const isLogin = mode === "login";
+
   return (
-    <div className="relative flex flex-col w-full h-full bg-slate-900 overflow-hidden">
+    <div className="w-full h-full p-12 ml-15 xl:px-8 flex flex-col gap-0 relative z-10 transition-colors duration-300">
       
-      {/* Background Glows (Contained) */}
-      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-indigo-900/30 via-slate-900 to-slate-900 pointer-events-none"></div>
-      <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-purple-900/20 via-transparent to-transparent pointer-events-none"></div>
-      
-      {/* Header Area (Top Left per Wireframe) */}
-      <div className="relative z-10 w-full p-8 xl:p-12 pb-0 flex items-center gap-4">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-2xl text-white shadow-lg shadow-indigo-500/25">
-          W
-        </div>
-        <span className="font-bold text-2xl tracking-tight text-white">Writespace</span>
+      {/* Logo */}
+      <Link to="/" className="flex items-center gap-3 z-10">
+        {/* Light Mode Logo */}
+        <img
+          src="/logo.png"
+          alt="WriteSpace Logo"
+          className="w-10 h-10 rounded-full block dark:hidden"
+        />
+
+        {/* Dark Mode Logo */}
+        <img
+          src="/logo_light.png"
+          alt="WriteSpace Logo"
+          className="w-10 h-10 rounded-full hidden dark:block"
+        />
+
+        <span className="font-bold text-2xl text-[#0B192C] dark:text-white tracking-tight">
+          WriteSpace
+        </span>
+      </Link>
+
+      {/* Text Area */}
+      <div className="z-10 mt-4">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={mode}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            <h1 className="text-5xl lg:text-6xl font-extrabold text-[#0B192C] dark:text-white leading-tight mb-3 tracking-tight">
+              {isLogin ? (
+                <>Welcome <span className="relative inline-block text-[#F97316]">
+                  back.
+                  <svg className="absolute w-full h-3 -bottom-1 left-0 text-[#F97316]" viewBox="0 0 100 20" preserveAspectRatio="none">
+                    <path d="M0,15 Q50,0 100,15" stroke="currentColor" strokeWidth="6" fill="transparent" strokeLinecap="round" />
+                  </svg>
+                </span></>
+              ) : (
+                <>Create an <span className="relative inline-block text-[#F97316]">
+                  account
+                  <svg className="absolute w-full h-3 -bottom-1 left-0 text-[#F97316]" viewBox="0 0 100 20" preserveAspectRatio="none">
+                    <path d="M0,15 Q50,0 100,15" stroke="currentColor" strokeWidth="6" fill="transparent" strokeLinecap="round" />
+                  </svg>
+                </span></>
+              )}
+            </h1>
+            <p className="text-[#0B192C]/60 dark:text-gray-400 text-lg max-w-sm mt-3 font-medium transition-colors duration-300">
+              {isLogin 
+                ? "Continue your creative journey with WriteSpace." 
+                : "Join the community of creators and bring your ideas to life."}
+            </p>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      {/* Content Area (Vertically Centered) */}
-      <div className="relative z-10 w-full flex-1 flex flex-col justify-center px-12 xl:px-20 max-w-[600px]">
-        <h1 className="text-3xl xl:text-4xl font-extrabold leading-tight mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 tracking-tight">
-          The Modern Platform <br /> for Thinkers & Writers.
-        </h1>
-        <p className="text-base text-slate-400 leading-relaxed mb-8">
-          Create, share, and engage. Writespace is your dedicated environment to publish ideas, interact with a global community, and build your digital portfolio.
-        </p>
-        
-        {/* Feature Boxes */}
-        <div className="flex flex-col gap-4">
-          <div className="p-5 bg-white/[0.02] rounded-2xl border border-white/5 backdrop-blur-md hover:bg-white/[0.04] transition-colors">
-            <div className="flex items-center gap-3 mb-2">
-              <PenTool size={20} className="text-indigo-400" />
-              <span className="text-sm font-semibold text-white cursor-default">Distraction-Free Editor</span>
-            </div>
-            <div className="text-sm text-slate-400 leading-relaxed cursor-default">
-              Draft beautifully formatted long-form articles with our intuitive, powerful rich-text experience.
-            </div>
-          </div>
-
-          <div className="p-5 bg-white/[0.02] rounded-2xl border border-white/5 backdrop-blur-md hover:bg-white/[0.04] transition-colors">
-            <div className="flex items-center gap-3 mb-2">
-              <MessageSquare size={20} className="text-purple-400" />
-              <span className="text-sm font-semibold text-white cursor-default">Community Engagement</span>
-            </div>
-            <div className="text-sm text-slate-400 leading-relaxed cursor-default">
-              Connect with readers. Like, share, and dive into threaded discussions on the topics that matter to you.
-            </div>
-          </div>
-
-          <div className="p-5 bg-white/[0.02] rounded-2xl border border-white/5 backdrop-blur-md hover:bg-white/[0.04] transition-colors">
-            <div className="flex items-center gap-3 mb-2">
-              <UserCircle size={20} className="text-sky-400" />
-              <span className="text-sm font-semibold text-white cursor-default">Dynamic Profiles</span>
-            </div>
-            <div className="text-sm text-slate-400 leading-relaxed cursor-default">
-              Curate your digital identity. Showcase your best posts, track your reading stats, and grow your audience.
-            </div>
-          </div>
-        </div>
+      {/* ---> REPLACED 3D LAPTOP WITH NEW IMAGE <--- */}
+      <div className="relative w-full h-[360px] mt-6 flex items-center justify-center z-10">
+        <motion.img 
+          src="/login_photo.png" // <-- Make sure your image is named exactly this in the public folder
+          alt="WriteSpace 3D Illustration"
+          className="w-full h-full object-contain drop-shadow-2xl"
+          animate={{ y: [0, -12, 0] }} // Smooth floating effect
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
       </div>
 
+      {/* Bottom Link Text */}
+      <div className="z-10 text-sm text-[#0B192C]/70 dark:text-gray-400 mt-6 font-medium transition-colors duration-300">
+        {isLogin ? "Don't have an account? " : "Already have an account? "}
+        <button onClick={onToggleForm} className="font-semibold text-[#A855F7] hover:underline">
+          {isLogin ? "Sign up" : "Log in"}
+        </button>
+        <ArrowRight className="w-4 h-4 inline ml-1" />
+      </div>
     </div>
   );
-};
-
-export default AuthBranding;
+}

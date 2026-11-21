@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Lock, User as UserIcon, Loader2, ArrowLeft, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react';
+import { Mail, Lock, User as UserIcon, Loader2, ArrowLeft, Eye, EyeOff, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
 import { AuthAPI } from '@/features/auth/api/auth.api';
 import { UsersAPI } from '@/features/users/api/users.api';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -97,15 +97,15 @@ const RegisterComponent: React.FC<RegisterComponentProps> = ({ onToggleForm }) =
   if (step === 'otp') {
     return (
       <div className="w-full text-center">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 tracking-tight">Verify email</h2>
-        <p className="mb-8 text-sm text-slate-400">Code sent to <strong className="text-white">{email}</strong></p>
+        <h2 className="text-2xl sm:text-3xl font-bold text-[#0B192C] dark:text-white mb-2 tracking-tight transition-colors duration-300">Verify email</h2>
+        <p className="mb-8 text-sm text-[#0B192C]/60 dark:text-gray-400 transition-colors duration-300">Code sent to <strong className="text-[#0B192C] dark:text-white">{email}</strong></p>
         <form onSubmit={handleOtpSubmit} className="space-y-8">
           <OtpInput length={6} value={otp} onChange={setOtp} disabled={isLoading} />
-          <button type="submit" disabled={isLoading || otp.length < 6} className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 flex justify-center items-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 hover:opacity-90 disabled:opacity-60 transition-all cursor-pointer">
+          <button type="submit" disabled={isLoading || otp.length < 6} className="w-full bg-[#F97316] flex justify-center items-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-500/30 hover:bg-[#ea580c] disabled:opacity-60 transition-all">
             {isLoading ? <Loader2 size={20} className="animate-spin" /> : "Verify Account"}
           </button>
         </form>
-        <button onClick={() => setStep('form')} className="mt-6 flex items-center justify-center text-sm font-medium text-slate-400 hover:text-white mx-auto transition-colors cursor-pointer">
+        <button onClick={() => setStep('form')} className="mt-6 flex items-center justify-center text-sm font-medium text-[#A855F7] hover:underline mx-auto transition-colors">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </button>
       </div>
@@ -114,44 +114,44 @@ const RegisterComponent: React.FC<RegisterComponentProps> = ({ onToggleForm }) =
 
   return (
     <div className="w-full">
-      <div className="mb-8 text-center sm:text-left">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2">Create an account</h2>
-        <p className="text-sm text-slate-400">Join the community of professionals.</p>
+      <div className="mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-[#0B192C] dark:text-white tracking-tight mb-2 transition-colors duration-300">Create an account</h2>
+        <p className="text-[#0B192C]/60 dark:text-gray-400 text-sm transition-colors duration-300">Join the community of creators.</p>
       </div>
 
       <form onSubmit={handleRegisterSubmit} className="flex flex-col gap-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="relative">
-            <UserIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input type="text" required value={fullname} onChange={(e) => setFullname(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl px-4 py-3.5 pl-11 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm" placeholder="Full Name" />
+            <UserIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input type="text" required value={fullname} onChange={(e) => setFullname(e.target.value)} className="w-full bg-white dark:bg-[#0B192C]/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3.5 pl-11 text-[#0B192C] dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F97316]/50 transition-all text-sm shadow-sm" placeholder="Full Name" />
           </div>
           
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">@</span>
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">@</span>
             <input 
               type="text" 
               required 
               value={username} 
               onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, ''))} 
-              className={`w-full bg-slate-900/50 border rounded-xl px-4 py-3.5 pl-10 pr-10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition-all text-sm ${
-                usernameStatus === "UNAVAILABLE" ? "border-red-500 focus:ring-red-500" : 
-                usernameStatus === "AVAILABLE" ? "border-green-500 focus:ring-green-500" : 
-                "border-slate-700/50 focus:ring-indigo-500"
+              className={`w-full bg-white dark:bg-[#0B192C]/50 border rounded-xl px-4 py-3.5 pl-10 pr-10 text-[#0B192C] dark:text-white placeholder-gray-400 focus:outline-none transition-all text-sm shadow-sm ${
+                usernameStatus === "UNAVAILABLE" ? "border-red-500 focus:ring-red-500/50" : 
+                usernameStatus === "AVAILABLE" ? "border-green-500 focus:ring-green-500/50" : 
+                "border-gray-200 dark:border-white/10 focus:ring-[#F97316]/50"
               }`} 
               placeholder="username" 
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              {usernameStatus === "LOADING" && <Loader2 size={16} className="animate-spin text-slate-400" />}
+              {usernameStatus === "LOADING" && <Loader2 size={16} className="animate-spin text-gray-400" />}
               {usernameStatus === "AVAILABLE" && <CheckCircle2 size={16} className="text-green-500" />}
               {usernameStatus === "UNAVAILABLE" && <XCircle size={16} className="text-red-500" />}
             </div>
             
             {usernameStatus === "UNAVAILABLE" && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 mt-2 w-full p-2 bg-red-500/10 border border-red-500/20 rounded-lg z-20 backdrop-blur-md">
-                <p className="text-xs text-red-400 mb-2">Suggested:</p>
+              <div className="absolute top-full left-0 mt-2 w-full p-2 bg-white dark:bg-[#1A1433] border border-red-500/20 dark:border-red-500/40 rounded-lg z-20 shadow-xl transition-colors duration-300">
+                <p className="text-xs text-red-500 mb-2 font-medium">Suggested:</p>
                 <div className="flex flex-wrap gap-2">
                   {suggestions.map(s => (
-                    <button key={s} type="button" onClick={() => setUsername(s)} className="text-[0.7rem] bg-white/10 text-white px-2 py-1 rounded-md hover:bg-white/20 transition-colors cursor-pointer">
+                    <button key={s} type="button" onClick={() => setUsername(s)} className="text-[0.7rem] bg-gray-100 dark:bg-white/10 text-[#0B192C] dark:text-white px-2 py-1 rounded-md hover:bg-gray-200 dark:hover:bg-white/20 transition-colors">
                       {s}
                     </button>
                   ))}
@@ -162,31 +162,27 @@ const RegisterComponent: React.FC<RegisterComponentProps> = ({ onToggleForm }) =
         </div>
 
         <div className="relative">
-          <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl px-4 py-3.5 pl-11 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm" placeholder="Email Address" />
+          <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-white dark:bg-[#0B192C]/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3.5 pl-11 text-[#0B192C] dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F97316]/50 transition-all text-sm shadow-sm" placeholder="Email Address" />
         </div>
 
         <div className="relative">
-          <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input type={showPassword ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl px-4 py-3.5 pl-11 pr-12 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm" placeholder="Password (min 8 chars)" />
-          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer">
+          <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input type={showPassword ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-white dark:bg-[#0B192C]/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3.5 pl-11 pr-12 text-[#0B192C] dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F97316]/50 transition-all text-sm shadow-sm" placeholder="Password (min 8 chars)" />
+          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
 
         <div className="relative">
-          <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input type={showPassword ? "text" : "password"} required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl px-4 py-3.5 pl-11 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm" placeholder="Confirm Password" />
+          <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input type={showPassword ? "text" : "password"} required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full bg-white dark:bg-[#0B192C]/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3.5 pl-11 text-[#0B192C] dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F97316]/50 transition-all text-sm shadow-sm" placeholder="Confirm Password" />
         </div>
 
-        <button type="submit" disabled={isLoading || usernameStatus === "UNAVAILABLE"} className="mt-4 w-full bg-gradient-to-r from-indigo-500 to-purple-600 flex justify-center items-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 hover:opacity-90 disabled:opacity-60 transition-all cursor-pointer">
-          {isLoading ? <Loader2 size={20} className="animate-spin" /> : "Create Account"}
+        <button type="submit" disabled={isLoading || usernameStatus === "UNAVAILABLE"} className="mt-2 w-full bg-[#F97316] flex justify-center items-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-500/30 hover:bg-[#ea580c] disabled:opacity-60 transition-all">
+          {isLoading ? <Loader2 size={20} className="animate-spin" /> : <>Create Account <ArrowRight size={18} /></>}
         </button>
       </form>
-
-      <div className="mt-8 text-center text-sm text-slate-400">
-        Already have an account? <button onClick={onToggleForm} className="font-semibold text-indigo-400 hover:text-indigo-300 ml-1 cursor-pointer">Log in</button>
-      </div>
     </div>
   );
 };

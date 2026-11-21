@@ -4,7 +4,6 @@ import RegisterComponent from "@/features/auth/components/RegisterComponent";
 import ForgotPasswordComponent from "@/features/auth/components/ForgotPasswordComponent";
 import ResetPasswordComponent from "@/features/auth/components/ResetPasswordComponent";
 import AuthBranding from "@/features/auth/components/AuthBranding";
-import Footer from "../../components/layout/Footer";
 
 type AuthMode = 'login' | 'register' | 'forgot' | 'reset';
 
@@ -20,47 +19,48 @@ const AuthPage: React.FC<AuthPageProps> = ({ initialMode = 'login' }) => {
   }, [initialMode]);
 
   return (
-    <div className="flex flex-col min-h-screen w-full bg-slate-900 text-slate-50 font-sans selection:bg-indigo-500/30">
+    <div className="relative flex min-h-screen w-full font-sans bg-[#FFF9F5] dark:bg-[#0B192C] overflow-hidden transition-colors duration-300">
       
-      {/* Main Container - Flex Row on Desktop, Column on Mobile */}
-      <div className="flex flex-1 w-full flex-col lg:flex-row">
+      {/* ================= BACKGROUND ORGANIC CURVES ================= */}
+      {/* Left Peach Curve (Dark mode: Deep Purple Glow) */}
+      <div className="absolute top-[-20%] left-[-10%] w-[70vw] h-[70vw] bg-[#FFE8D6] dark:bg-[#A855F7]/10 rounded-full z-0 pointer-events-none transition-colors duration-300 blur-[100px]"></div>
+      
+      {/* Right Orange/Peach Glow (Dark mode: Deep Orange Glow) */}
+      <div className="absolute bottom-[-30%] right-[-10%] w-[80vw] h-[80vw] bg-[#FFDAB9] dark:bg-[#F97316]/10 rounded-full z-0 pointer-events-none opacity-50 transition-colors duration-300 blur-[100px]"></div>
+      
+      {/* Center-ish Soft Purple */}
+      <div className="absolute top-[20%] right-[10%] w-[40vw] h-[40vw] bg-[#F3E8FF] dark:bg-[#4C1D95]/20 rounded-full filter blur-[80px] z-0 pointer-events-none opacity-60 transition-colors duration-300"></div>
+
+      {/* ================= MAIN CONTENT ================= */}
+      <div className="relative z-10 flex w-full">
         
-        {/* Left side - Branding (Hidden on Mobile) */}
-        <div className="hidden lg:flex lg:flex-col lg:w-1/2 border-r border-slate-800/50 min-h-screen relative z-20 bg-slate-900">
-          <AuthBranding />
+        {/* LEFT SIDE - Branding */}
+        <div className="hidden lg:flex lg:w-1/2 relative">
+          <AuthBranding 
+            mode={mode} 
+            onToggleForm={() => setMode(mode === 'login' ? 'register' : 'login')} 
+          />
         </div>
 
-        {/* Right side - Interactive Area */}
-        <div className="flex-1 flex flex-col relative min-h-screen">
+        {/* RIGHT SIDE - Glass Form Card */}
+        <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-4 sm:px-8 py-10 relative">
           
-          {/* Ambient Glows */}
-          <div className="absolute top-10 right-10 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
-          <div className="absolute bottom-10 left-10 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
-
-          {/* Mobile Header */}
-          <div className="lg:hidden flex flex-col items-center justify-center gap-3 pt-12 pb-4 w-full shrink-0 relative z-10">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-xl text-white shadow-lg">
-              W
-            </div>
-            <span className="font-bold text-2xl tracking-tight text-white">Writespace</span>
+          {/* Mobile Logo */}
+          <div className="lg:hidden absolute top-8 left-8 flex items-center gap-2">
+            <img src="/logo_light.png" alt="Logo" className="w-8 h-8 rounded-full dark:hidden" />
+            <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-full hidden dark:block" />
+            <span className="font-bold text-xl text-[#0B192C] dark:text-white">WriteSpace</span>
           </div>
 
-          {/* Form Area - Perfectly Centered */}
-          <div className="flex-1 flex flex-col justify-center items-center w-full px-4 sm:px-8 py-8 relative z-10">
-            <div className="w-full max-w-md bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-[2rem] p-8 sm:p-10 shadow-2xl transition-all duration-300">
-              {mode === 'login' && <LoginComponent onToggleForm={() => setMode('register')} onForgotPassword={() => setMode('forgot')} />}
-              {mode === 'register' && <RegisterComponent onToggleForm={() => setMode('login')} />}
-              {mode === 'forgot' && <ForgotPasswordComponent onBackToLogin={() => setMode('login')} />}
-              {mode === 'reset' && <ResetPasswordComponent />}
-            </div>
+          {/* THE FROSTED CARD */}
+          <div className="w-full max-w-[420px] bg-white/60 dark:bg-[#1A1433]/60 backdrop-blur-2xl rounded-[2rem] p-8 sm:p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] border border-white/80 dark:border-white/10 relative z-20 transition-colors duration-300">
+            {mode === 'login' && <LoginComponent onToggleForm={() => setMode('register')} onForgotPassword={() => setMode('forgot')} />}
+            {mode === 'register' && <RegisterComponent onToggleForm={() => setMode('login')} />}
+            {mode === 'forgot' && <ForgotPasswordComponent onBackToLogin={() => setMode('login')} />}
+            {mode === 'reset' && <ResetPasswordComponent />}
           </div>
-
-          {/* Footer - Anchored to bottom of the right panel */}
-          <div className="w-full shrink-0 relative z-20 border-t border-slate-800/50 bg-slate-900/50 backdrop-blur-sm">
-            <Footer variant="auth" />
-          </div>
-
         </div>
+
       </div>
     </div>
   );
