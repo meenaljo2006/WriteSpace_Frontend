@@ -70,10 +70,9 @@ export default function AuthBranding({ mode = "login", onToggleForm }: BrandingP
         </AnimatePresence>
       </div>
 
-      {/* ---> REPLACED 3D LAPTOP WITH NEW IMAGE <--- */}
       <div className="relative w-full h-[360px] mt-6 flex items-center justify-center z-10">
         <motion.img 
-          src="/login_photo.png" // <-- Make sure your image is named exactly this in the public folder
+          src="/login_photo.png" 
           alt="WriteSpace 3D Illustration"
           className="w-full h-full object-contain drop-shadow-2xl"
           animate={{ y: [0, -12, 0] }} // Smooth floating effect

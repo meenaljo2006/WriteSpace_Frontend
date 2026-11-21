@@ -86,13 +86,11 @@ const LoginComponent: React.FC<LoginComponentProps> = ({ onToggleForm, onForgotP
           </button>
         </div>
 
-        {/* Solid Orange Button */}
         <button type="submit" disabled={isLoading} className="mt-2 w-full bg-[#F97316] flex justify-center items-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white hover:bg-[#ea580c] disabled:opacity-60 transition-all shadow-md shadow-orange-500/20">
           {isLoading ? <Loader2 size={20} className="animate-spin" /> : <>Sign In <ArrowRight size={18} /></>}
         </button>
       </form>
 
-      {/* Divider */}
       <div className="mt-6 mb-5 flex items-center gap-4">
         <div className="h-[1px] flex-1 bg-gray-200 dark:bg-white/10 transition-colors duration-300"></div>
         <span className="text-[0.65rem] text-gray-400 font-semibold tracking-wider uppercase">Or continue with</span>

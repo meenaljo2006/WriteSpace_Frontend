@@ -22,13 +22,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ initialMode = 'login' }) => {
     <div className="relative flex min-h-screen w-full font-sans bg-[#FFF9F5] dark:bg-[#0B192C] overflow-hidden transition-colors duration-300">
       
       {/* ================= BACKGROUND ORGANIC CURVES ================= */}
-      {/* Left Peach Curve (Dark mode: Deep Purple Glow) */}
       <div className="absolute top-[-20%] left-[-10%] w-[70vw] h-[70vw] bg-[#FFE8D6] dark:bg-[#A855F7]/10 rounded-full z-0 pointer-events-none transition-colors duration-300 blur-[100px]"></div>
-      
-      {/* Right Orange/Peach Glow (Dark mode: Deep Orange Glow) */}
       <div className="absolute bottom-[-30%] right-[-10%] w-[80vw] h-[80vw] bg-[#FFDAB9] dark:bg-[#F97316]/10 rounded-full z-0 pointer-events-none opacity-50 transition-colors duration-300 blur-[100px]"></div>
-      
-      {/* Center-ish Soft Purple */}
       <div className="absolute top-[20%] right-[10%] w-[40vw] h-[40vw] bg-[#F3E8FF] dark:bg-[#4C1D95]/20 rounded-full filter blur-[80px] z-0 pointer-events-none opacity-60 transition-colors duration-300"></div>
 
       {/* ================= MAIN CONTENT ================= */}
