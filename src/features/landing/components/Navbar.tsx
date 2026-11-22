@@ -8,7 +8,7 @@ const navLinks = [
   { name: 'Home', path: '/', icon: Home },
   { name: 'Features', path: '/features', icon: LayoutGrid },
   { name: 'Explore', path: '/explore', icon: Compass },
-  { name: 'Community', path: '/community', icon: Users },
+  { name: 'Community', path: '/community', icon: Users }, 
 ];
 
 export default function Navbar() {

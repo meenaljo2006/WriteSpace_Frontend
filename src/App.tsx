@@ -20,6 +20,7 @@ import MessagesPage from "./pages/messages/MessagesPage";
 import PublicLayout from "./features/landing/layout/PublicLayout";
 import Landing from "./features/landing/pages/Landing"; 
 import Features from "./features/landing/pages/Features";
+import Explore from '@/features/landing/pages/Explore';
 import Community from "./features/landing/pages/Community";
 
 // Context & Providers
@@ -68,6 +69,7 @@ const AppContent: React.FC = () => {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
           <Route path="/features" element={<PublicRoute><Features /></PublicRoute>} />
+          <Route path="/explore" element={<Explore />} />
           <Route path="/community" element={<PublicRoute><Community /></PublicRoute>} />
         </Route>
 
