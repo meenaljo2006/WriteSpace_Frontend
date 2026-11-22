@@ -13,10 +13,10 @@ interface PostActionsProps {
 }
 
 const actionClass =
-  "inline-flex min-w-0 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-offset-slate-900 sm:gap-2 sm:px-3";
+  "inline-flex min-w-0 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 sm:gap-2 sm:px-3";
 
 const inactiveActionClass =
-  "text-slate-600 hover:bg-blue-50 hover:text-blue-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-blue-300";
+  "text-stone-500 hover:text-orange-600 dark:text-stone-400 dark:hover:text-orange-400 bg-transparent";
 
 export default function PostActions({
   isLiked,
@@ -33,7 +33,7 @@ export default function PostActions({
 
   return (
     <div
-      className={`grid ${actionsClass} gap-1 border-t border-blue-100 pt-3 dark:border-slate-700 sm:gap-2`}
+      className={`grid ${actionsClass} gap-1 border-t border-stone-200/60 pt-3 dark:border-white/10 sm:gap-2`}
       aria-label="Post actions"
     >
       <button
@@ -43,7 +43,7 @@ export default function PostActions({
         aria-pressed={isLiked}
         className={`${actionClass} ${
           isLiked
-            ? "text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-slate-800"
+            ? "text-orange-500 bg-transparent dark:text-orange-400"
             : inactiveActionClass
         }`}
       >
@@ -82,7 +82,7 @@ export default function PostActions({
           aria-pressed={isSaved}
           className={`${actionClass} ${
             isSaved
-              ? "text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-slate-800"
+              ? "text-orange-500 bg-transparent dark:text-orange-400"
               : inactiveActionClass
           }`}
         >

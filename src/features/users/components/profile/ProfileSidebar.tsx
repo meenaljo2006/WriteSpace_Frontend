@@ -37,121 +37,68 @@ const ProfileSidebar: React.FC = () => {
   }, []);
 
   const displayUser = userData || authUser;
-
-  const cardBg = isDark ? "#1e293b" : "#ffffff";
-  const borderColor = isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.08)";
-  const textColor = isDark ? "#f1f5f9" : "#0f172a";
-  const mutedText = isDark ? "#94a3b8" : "#64748b";
-  const accentColor = "#6366f1";
-
-  const cardStyle: React.CSSProperties = {
-    backgroundColor: cardBg,
-    borderRadius: "12px",
-    border: `1px solid ${borderColor}`,
-    overflow: "hidden",
-    color: textColor,
-    boxShadow: isDark ? "0 4px 6px rgba(0,0,0,0.2)" : "0 1px 3px rgba(0,0,0,0.05)",
-    transition: "background-color 0.3s, border-color 0.3s"
-  };
-
-  const statRowStyle: React.CSSProperties = {
-    display: "flex",
-    justifyContent: "space-between",
-    fontSize: "0.85rem",
-    color: mutedText,
-    textDecoration: "none",
-    padding: "4px 0"
-  };
-
-  const statValueStyle: React.CSSProperties = {
-    color: accentColor,
-    fontWeight: "600",
-    display: "flex",
-    alignItems: "center"
-  };
-
-  const linkRowStyle: React.CSSProperties = {
-    display: "flex", 
-    alignItems: "center", 
-    gap: "8px", 
-    fontSize: "0.85rem", 
-    cursor: "pointer", 
-    color: mutedText,
-    textDecoration: "none"
-  };
-
   const bannerStyle: React.CSSProperties = {
-    height: "70px",
-    backgroundColor: accentColor,
     backgroundImage: displayUser?.bannerImageUrl 
       ? `url(${displayUser.bannerImageUrl})` 
-      : "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
+      : "none",
     backgroundSize: "cover",
     backgroundPosition: "center"
   };
 
   return (
-    <div style={cardStyle}>
-      <div style={bannerStyle} />
+    <div className="bg-white/70 dark:bg-[#15233B]/70 backdrop-blur-md border border-white/80 dark:border-white/10 shadow-[0_8px_30px_rgb(249,115,22,0.06)] rounded-2xl overflow-hidden transition-colors duration-300">
       
-      <div style={{ padding: "0 1rem 1rem 1rem", textAlign: "center", marginTop: "-30px" }}>
-        <Link to="/profile" style={{ display: "inline-block", textDecoration: "none" }}>
-          <div style={{ 
-            width: "64px", height: "64px", borderRadius: "50%", margin: "0 auto 10px auto",
-            backgroundColor: isDark ? "#334155" : "#e2e8f0", 
-            border: `3px solid ${cardBg}`, display: "flex", alignItems: "center", justifyContent: "center",
-            overflow: "hidden",
-            transition: "transform 0.2s ease-in-out"
-          }}
-          onMouseOver={(e) => e.currentTarget.style.transform = "scale(1.05)"}
-          onMouseOut={(e) => e.currentTarget.style.transform = "scale(1)"}
-          >
+      {/* Banner */}
+      <div 
+        className="h-20 w-full bg-gradient-to-r from-orange-400 to-orange-300 dark:from-orange-700 dark:to-orange-900"
+        style={bannerStyle}
+      />
+      
+      <div className="px-4 pb-4 text-center -mt-8">
+        {/* Avatar */}
+        <Link to="/profile" className="inline-block no-underline group">
+          <div className="w-16 h-16 rounded-full mx-auto mb-2 bg-stone-200 dark:bg-stone-800 border-4 border-white dark:border-[#15233B] flex items-center justify-center overflow-hidden transition-transform duration-200 group-hover:scale-105 shadow-sm">
             {displayUser?.profileImageUrl ? (
-              <img src={displayUser.profileImageUrl} alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img src={displayUser.profileImageUrl} alt="Profile" className="w-full h-full object-cover" />
             ) : (
-              <User size={32} color={mutedText} />
+              <User size={32} className="text-stone-400 dark:text-stone-500" />
             )}
           </div>
         </Link>
         
-        <Link to="/profile" style={{ textDecoration: "none", color: "inherit" }}>
-          <h2 style={{ fontSize: "1.1rem", fontWeight: "600", margin: "0 0 4px 0", fontFamily: "Inter, sans-serif" }}
-              onMouseOver={(e) => e.currentTarget.style.textDecoration = "underline"}
-              onMouseOut={(e) => e.currentTarget.style.textDecoration = "none"}
-          >
+        {/* Name & Headline */}
+        <Link to="/profile" className="no-underline text-inherit">
+          <h2 className="text-lg font-bold text-[#0B192C] dark:text-white m-0 mb-1 hover:underline font-sans">
             {displayUser?.fullname || "User"}
           </h2>
         </Link>
-        <p style={{ fontSize: "0.85rem", color: mutedText, margin: "0 0 16px 0", lineHeight: "1.4", wordBreak: "break-word" }}>
+        <p className="text-sm text-[#0B192C]/60 dark:text-gray-400 mb-4 leading-relaxed break-words line-clamp-2">
           {displayUser?.headline || displayUser?.bio || "Add a headline in your profile settings to stand out."}
         </p>
         
-        <div style={{ 
-          borderTop: `1px solid ${borderColor}`, paddingTop: "12px", 
-          borderBottom: `1px solid ${borderColor}`, paddingBottom: "12px", 
-          textAlign: "left", display: "flex", flexDirection: "column", gap: "8px"
-        }}>
-          <Link to="/profile" style={statRowStyle} onMouseOver={(e) => e.currentTarget.style.color = textColor} onMouseOut={(e) => e.currentTarget.style.color = mutedText}>
+        {/* Stats */}
+        <div className="border-t border-b border-black/5 dark:border-white/10 py-3 text-left flex flex-col gap-2">
+          <Link to="/profile" className="flex justify-between text-sm text-[#0B192C]/60 dark:text-gray-400 hover:text-[#0B192C] dark:hover:text-white transition-colors no-underline">
             <span>Followers</span>
-            <span style={statValueStyle}>
+            <span className="font-semibold text-orange-500 flex items-center">
               {isLoading ? <Loader2 size={12} className="animate-spin" /> : (displayUser?.totalFollowers || 0)}
             </span>
           </Link>
-          <Link to="/profile" style={statRowStyle} onMouseOver={(e) => e.currentTarget.style.color = textColor} onMouseOut={(e) => e.currentTarget.style.color = mutedText}>
+          <Link to="/profile" className="flex justify-between text-sm text-[#0B192C]/60 dark:text-gray-400 hover:text-[#0B192C] dark:hover:text-white transition-colors no-underline">
             <span>My Posts</span>
-            <span style={statValueStyle}>
+            <span className="font-semibold text-orange-500 flex items-center">
               {isLoading ? <Loader2 size={12} className="animate-spin" /> : (displayUser?.totalPosts || 0)}
             </span>
           </Link>
         </div>
 
-        <div style={{ paddingTop: "12px", display: "flex", flexDirection: "column", gap: "10px", textAlign: "left" }}>
-          
-          <Link to="/saved" style={linkRowStyle} onMouseOver={(e) => e.currentTarget.style.color = textColor} onMouseOut={(e) => e.currentTarget.style.color = mutedText}>
+        {/* Navigation Links */}
+        <div className="pt-3 flex flex-col gap-2.5 text-left">
+          <Link to="/saved" className="flex items-center gap-2 text-sm text-[#0B192C]/60 dark:text-gray-400 hover:text-orange-500 transition-colors no-underline">
             <Bookmark size={16} />
             <span>Saved items</span>
           </Link>
-          <Link to="/settings" style={linkRowStyle} onMouseOver={(e) => e.currentTarget.style.color = textColor} onMouseOut={(e) => e.currentTarget.style.color = mutedText}>
+          <Link to="/settings" className="flex items-center gap-2 text-sm text-[#0B192C]/60 dark:text-gray-400 hover:text-orange-500 transition-colors no-underline">
             <Settings size={16} />
             <span>Profile Settings</span>
           </Link>

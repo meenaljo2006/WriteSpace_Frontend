@@ -24,13 +24,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ isMobile, autoFocus, 
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
   
-  
   const searchContainerRef = useRef<HTMLDivElement>(null);
-
-  const textColor = isDark ? "#f1f5f9" : "#0f172a";
-  const iconColor = isDark ? "rgba(255,255,255,0.6)" : "rgba(15,23,42,0.6)";
-  const mutedText = isDark ? "#94a3b8" : "#64748b";
-  const borderColor = isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.08)";
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -57,9 +51,6 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ isMobile, autoFocus, 
 
       setIsSearching(true);
 
-      // Users search is required — the existing experience depends on it.
-      // Post search uses the AI backend and can fail independently (Ollama
-      // down, no embeddings yet, etc.). Never let it break user search.
       const [usersOutcome, postsOutcome] = await Promise.allSettled([
         UsersAPI.searchUsers(q),
         SearchAPI.searchPosts({ q, limit: 5 }),
@@ -101,103 +92,70 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ isMobile, autoFocus, 
   };
 
   return (
-    <div ref={searchContainerRef} style={{ position: "relative", width: "100%", flex: isMobile ? 1 : "unset" }}>
+    <div ref={searchContainerRef} className={`relative w-full ${isMobile ? 'flex-1' : ''}`}>
       
-      {/* THE INPUT FIELD */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          padding: isMobile ? "0" : "6px 12px",
-          width: "100%",
-          background: isMobile ? "transparent" : (isDark ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.04)"),
-          borderRadius: "4px",
-          border: isMobile ? "none" : (isDark ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(0, 0, 0, 0.08)"),
-          transition: "background-color 0.3s ease",
-        }}
-      >
-        {!isMobile && <Search size={16} color={iconColor} />}
+      {/* ================= INPUT FIELD ================= */}
+      <div className="relative flex items-center w-full group">
+        
+        {/* Yahan z-10, pointer-events-none, aur text-stone-500 add kiya hai */}
+        <Search 
+          size={isMobile ? 20 : 18} 
+          className="absolute left-4 z-10 pointer-events-none text-stone-500 dark:text-stone-400 group-focus-within:text-orange-500 transition-colors duration-200" 
+        />
+        
         <input
           autoFocus={autoFocus}
           type="text"
-          placeholder="Search Writespace..."
+          placeholder="Search WriteSpace..."
           value={searchQuery}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
           onFocus={() => {
             if (searchQuery.length >= 2) setShowDropdown(true);
           }}
-          style={{
-            background: "transparent",
-            border: "none",
-            color: textColor,
-            outline: "none",
-            width: "100%",
-            fontSize: isMobile ? "1rem" : "0.85rem",
-          }}
+          className={`
+            relative z-0
+            w-full 
+            ${isMobile 
+              ? "bg-transparent border-none text-base py-2 pl-11 pr-4" 
+              : "bg-white/60 dark:bg-stone-800/60 backdrop-blur-md border border-stone-200/80 dark:border-white/10 rounded-full py-2.5 pl-11 pr-4 shadow-sm shadow-stone-200/50 dark:shadow-none"
+            }
+            text-sm text-stone-800 dark:text-stone-200 
+            placeholder-stone-400 dark:placeholder-stone-500
+            focus:outline-none 
+            focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500/40 
+            focus:bg-white dark:focus:bg-stone-900
+            transition-all duration-300
+          `}
         />
       </div>
 
-      {/* THE DROPDOWN */}
+      {/* ================= DROPDOWN ================= */}
       {showDropdown && (
         <div
-          style={{
-            position: "absolute",
-            top: isMobile ? "calc(100% + 20px)" : "calc(100% + 8px)",
-            left: isMobile ? "-40px" : 0, 
-            right: 0,
-            width: isMobile ? "calc(100vw - 32px)" : "100%", 
-            backgroundColor: isDark ? "#1e293b" : "#ffffff",
-            border: `1px solid ${borderColor}`,
-            borderRadius: "8px",
-            boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
-            overflow: "hidden",
-            zIndex: 1001,
-            maxHeight: "350px",
-            overflowY: "auto",
-          }}
+          className={`
+            absolute z-[1001] overflow-hidden flex flex-col
+            bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl 
+            border border-stone-200/80 dark:border-white/10 
+            shadow-[0_8px_30px_rgb(0,0,0,0.12)] 
+            rounded-xl max-h-[380px] overflow-y-auto
+            ${isMobile ? "top-[calc(100%+20px)] -left-[40px] w-[calc(100vw-32px)]" : "top-[calc(100%+8px)] left-0 w-full"}
+          `}
         >
           {isSearching ? (
-            <div
-              style={{
-                padding: "16px",
-                display: "flex",
-                justifyContent: "center",
-                color: mutedText,
-              }}
-            >
-              <Loader2
-                size={20}
-                style={{ animation: "spin 1s linear infinite" }}
-              />
-              <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
+            <div className="p-6 flex justify-center text-stone-500 dark:text-stone-400">
+              <Loader2 size={24} className="animate-spin text-orange-500" />
             </div>
           ) : userResults.length === 0 && postResults.length === 0 ? (
-            <div
-              style={{
-                padding: "16px",
-                textAlign: "center",
-                color: mutedText,
-                fontSize: "0.85rem",
-              }}
-            >
-              No results for "{searchQuery}"
+            <div className="p-6 text-center text-stone-500 dark:text-stone-400 text-sm">
+              No results found for "<span className="font-semibold text-stone-800 dark:text-stone-200">{searchQuery}</span>"
             </div>
           ) : (
-            <div>
-              {/* ---------- Users section ---------- */}
+            <div className="flex flex-col">
+              
+              {/* ---------- Users Section ---------- */}
               {userResults.length > 0 && (
                 <div>
-                  <div
-                    style={{
-                      padding: "8px 16px 4px 16px",
-                      fontSize: "0.7rem",
-                      fontWeight: 700,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.05em",
-                      color: mutedText,
-                    }}
-                  >
+                  <div className="px-4 pt-3 pb-1 text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                     People
                   </div>
 
@@ -205,67 +163,20 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ isMobile, autoFocus, 
                     <div
                       key={result.id}
                       onClick={() => handleResultClick(result.username)}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                        padding: "10px 16px",
-                        cursor: "pointer",
-                        transition: "background 0.2s",
-                      }}
-                      onMouseOver={(e) =>
-                        (e.currentTarget.style.backgroundColor = isDark
-                          ? "rgba(255,255,255,0.05)"
-                          : "rgba(0,0,0,0.02)")
-                      }
-                      onMouseOut={(e) =>
-                        (e.currentTarget.style.backgroundColor = "transparent")
-                      }
+                      className="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-colors"
                     >
-                      <div
-                        style={{
-                          width: "32px",
-                          height: "32px",
-                          borderRadius: "50%",
-                          backgroundColor: "#e2e8f0",
-                          overflow: "hidden",
-                          flexShrink: 0,
-                        }}
-                      >
+                      <div className="w-9 h-9 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden shrink-0">
                         <img
-                          src={
-                            result.profileImageUrl ||
-                            `https://ui-avatars.com/api/?name=${result.username}`
-                          }
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
+                          src={result.profileImageUrl || `https://ui-avatars.com/api/?name=${result.username}`}
+                          className="w-full h-full object-cover"
                           alt={result.username}
                         />
                       </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          overflow: "hidden",
-                          minWidth: 0,
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: "0.85rem",
-                            fontWeight: 600,
-                            color: textColor,
-                            whiteSpace: "nowrap",
-                            textOverflow: "ellipsis",
-                            overflow: "hidden",
-                          }}
-                        >
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-semibold text-stone-800 dark:text-stone-200 truncate">
                           {result.fullname}
                         </span>
-                        <span style={{ fontSize: "0.72rem", color: mutedText }}>
+                        <span className="text-xs text-stone-500 dark:text-stone-400">
                           @{result.username}
                         </span>
                       </div>
@@ -274,26 +185,10 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ isMobile, autoFocus, 
                 </div>
               )}
 
-              {/* ---------- Posts section ---------- */}
+              {/* ---------- Posts Section ---------- */}
               {postResults.length > 0 && (
-                <div
-                  style={{
-                    borderTop:
-                      userResults.length > 0
-                        ? `1px solid ${borderColor}`
-                        : "none",
-                  }}
-                >
-                  <div
-                    style={{
-                      padding: "8px 16px 4px 16px",
-                      fontSize: "0.7rem",
-                      fontWeight: 700,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.05em",
-                      color: mutedText,
-                    }}
-                  >
+                <div className={`${userResults.length > 0 ? "border-t border-stone-200/80 dark:border-white/10" : ""}`}>
+                  <div className="px-4 pt-3 pb-1 text-xs font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                     Posts
                   </div>
 
@@ -301,77 +196,21 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ isMobile, autoFocus, 
                     <div
                       key={post.id}
                       onClick={() => handlePostClick(post.id)}
-                      style={{
-                        display: "flex",
-                        alignItems: "flex-start",
-                        gap: "10px",
-                        padding: "10px 16px",
-                        cursor: "pointer",
-                        transition: "background 0.2s",
-                      }}
-                      onMouseOver={(e) =>
-                        (e.currentTarget.style.backgroundColor = isDark
-                          ? "rgba(255,255,255,0.05)"
-                          : "rgba(0,0,0,0.02)")
-                      }
-                      onMouseOut={(e) =>
-                        (e.currentTarget.style.backgroundColor = "transparent")
-                      }
+                      className="flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-colors"
                     >
-                      <div
-                        style={{
-                          width: "24px",
-                          height: "24px",
-                          borderRadius: "6px",
-                          backgroundColor: isDark
-                            ? "rgba(99,102,241,0.15)"
-                            : "rgba(99,102,241,0.1)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flexShrink: 0,
-                          marginTop: "2px",
-                        }}
-                      >
-                        <FileText size={13} color="#6366f1" />
+                      
+                      <div className="w-8 h-8 rounded-lg bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                        <FileText size={16} className="text-orange-500" />
                       </div>
 
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          minWidth: 0,
-                          gap: "2px",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: "0.85rem",
-                            fontWeight: 600,
-                            color: textColor,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            display: "-webkit-box",
-                            WebkitLineClamp: 1,
-                            WebkitBoxOrient: "vertical",
-                          }}
-                        >
+                      <div className="flex flex-col min-w-0 gap-0.5">
+                        <span className="text-sm font-semibold text-stone-800 dark:text-stone-200 truncate">
                           {post.title}
                         </span>
-                        <span
-                          style={{
-                            fontSize: "0.72rem",
-                            color: mutedText,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            display: "-webkit-box",
-                            WebkitLineClamp: 1,
-                            WebkitBoxOrient: "vertical",
-                          }}
-                        >
+                        <span className="text-xs text-stone-500 dark:text-stone-400 line-clamp-1">
                           {post.excerpt || post.subtitle || "—"}
                         </span>
-                        <span style={{ fontSize: "0.7rem", color: mutedText }}>
+                        <span className="text-[11px] font-medium text-stone-400 dark:text-stone-500 mt-0.5">
                           by {post.author.fullname || post.author.username}
                           {post.readTime ? ` · ${post.readTime} min read` : ""}
                         </span>
@@ -381,30 +220,14 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ isMobile, autoFocus, 
                 </div>
               )}
 
-              {/* ---------- View all footer ---------- */}
+              {/* ---------- View All Footer ---------- */}
               <div
                 onClick={() => {
                   setShowDropdown(false);
                   if (onCloseMobile) onCloseMobile();
                   navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
                 }}
-                style={{
-                  padding: "10px 16px",
-                  textAlign: "center",
-                  fontSize: "0.8rem",
-                  fontWeight: 600,
-                  color: "#6366f1",
-                  cursor: "pointer",
-                  borderTop: `1px solid ${borderColor}`,
-                }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.backgroundColor = isDark
-                    ? "rgba(99,102,241,0.08)"
-                    : "rgba(99,102,241,0.05)")
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.backgroundColor = "transparent")
-                }
+                className="p-3 text-center text-sm font-semibold text-orange-500 dark:text-orange-400 cursor-pointer border-t border-stone-200/80 dark:border-white/10 hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-colors"
               >
                 View all results for "{searchQuery.trim()}"
               </div>

@@ -2,14 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 import {
-  ThumbsUp,
+  Heart, 
   MessageSquare,
   Share2,
   MoreHorizontal,
   Link as LinkIcon,
   X,
   Trash2,
-  Heart,
   UserPlus,
   Pencil,
 } from "lucide-react";
@@ -94,7 +93,6 @@ const PostComponent: React.FC<PostComponentProps> = ({
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
-
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -180,8 +178,9 @@ const PostComponent: React.FC<PostComponentProps> = ({
     : "rgba(0, 0, 0, 0.08)";
   const textColor = isDark ? "#f1f5f9" : "#0f172a";
   const mutedText = isDark ? "#94a3b8" : "#64748b";
-  const primaryAction = isDark ? "#818cf8" : "#3b82f6";
-  const tagBg = isDark ? "rgba(99, 102, 241, 0.15)" : "#e0e7ff";
+  
+  const primaryAction = "#F97316"; 
+  const tagBg = isDark ? "rgba(249, 115, 22, 0.15)" : "#ffedd5";
 
   useEffect(() => {
     document.body.style.overflow =
@@ -334,8 +333,6 @@ const PostComponent: React.FC<PostComponentProps> = ({
       return;
     }
 
-    // Open the popup before awaiting the API so browsers are less likely
-    // to block the social-sharing window.
     let popup: Window | null = null;
 
     if (platform !== "copy") {
@@ -384,7 +381,6 @@ const PostComponent: React.FC<PostComponentProps> = ({
       } else if (popup) {
         popup.close();
       } else if (targetUrl) {
-        // Fallback if the browser blocked the initial popup.
         window.open(
           targetUrl,
           "_blank",
@@ -1032,7 +1028,7 @@ const PostComponent: React.FC<PostComponentProps> = ({
                 display: "flex",
               }}
             >
-              <ThumbsUp size={10} color="#fff" fill="#fff" />
+              <Heart size={10} color="#fff" fill="#fff" />
             </div>
             <span>{likesCount}</span>
           </div>
@@ -1069,21 +1065,19 @@ const PostComponent: React.FC<PostComponentProps> = ({
               padding: "12px 8px",
               borderRadius: "8px",
               cursor: isLikePending ? "wait" : "pointer",
-              transition: "background 0.2s",
+              transition: "color 0.2s",
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = isDark
-                ? "rgba(255,255,255,0.05)"
-                : "rgba(0,0,0,0.05)";
+              e.currentTarget.style.color = primaryAction;
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.color = isLiked ? primaryAction : mutedText;
             }}
           >
-            <ThumbsUp
+            <Heart
               size={20}
               fill={isLiked ? primaryAction : "none"}
-              strokeWidth={isLiked ? 0 : 2}
+              color={isLiked ? primaryAction : mutedText}
             />
             {!isMobile && <span>Like</span>}
           </button>
@@ -1104,15 +1098,13 @@ const PostComponent: React.FC<PostComponentProps> = ({
               padding: "12px 8px",
               borderRadius: "8px",
               cursor: "pointer",
-              transition: "background 0.2s",
+              transition: "color 0.2s",
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = isDark
-                ? "rgba(255,255,255,0.05)"
-                : "rgba(0,0,0,0.05)";
+              e.currentTarget.style.color = primaryAction;
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.color = mutedText;
             }}
           >
             <MessageSquare size={20} />
@@ -1135,15 +1127,13 @@ const PostComponent: React.FC<PostComponentProps> = ({
               padding: "12px 8px",
               borderRadius: "8px",
               cursor: "pointer",
-              transition: "background 0.2s",
+              transition: "color 0.2s",
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = isDark
-                ? "rgba(255,255,255,0.05)"
-                : "rgba(0,0,0,0.05)";
+              e.currentTarget.style.color = primaryAction;
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.color = mutedText;
             }}
           >
             <Share2 size={20} />
@@ -1151,10 +1141,12 @@ const PostComponent: React.FC<PostComponentProps> = ({
           </button>
         </div>
 
+        {/* FIX: Yahan postAuthorId add kar diya hai error hatane ke liye */}
         {showComments && (
           <CommentSection
             postId={currentPost.id}
             postAuthorUsername={currentPost.author?.username || ""}
+            postAuthorId={currentPost.author?.id || ""}
           />
         )}
       </div>

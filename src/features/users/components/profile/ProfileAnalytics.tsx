@@ -1,7 +1,6 @@
 import React from "react";
 import { Activity, Users, Eye, Heart, Tag, type LucideIcon } from "lucide-react";
 import type { User } from "@/types/api.types";
-import { useTheme } from "@/app/providers/ThemeProvider";
 
 interface ProfileAnalyticsProps {
   profileUser: User;
@@ -12,59 +11,68 @@ interface StatRowProps {
   icon: LucideIcon;
   value: number | string;
   label: string;
-  borderColor: string;
-  mutedText: string;
-  textColor: string;
   isLast?: boolean;
 }
 
-// 🔥 FIX: Replaced square boxes with a sleek vertical list sequence
-const StatRow: React.FC<StatRowProps> = ({ icon: Icon, value, label, borderColor, mutedText, textColor, isLast = false }) => (
-  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0", borderBottom: isLast ? "none" : `1px solid ${borderColor}` }}>
-    <div style={{ display: "flex", alignItems: "center", gap: "12px", color: mutedText }}>
-      <Icon size={18} />
-      <span style={{ fontSize: "0.9rem", fontWeight: 600 }}>{label}</span>
+// Stat Row 
+const StatRow: React.FC<StatRowProps> = ({ icon: Icon, value, label, isLast = false }) => (
+  <div 
+    className={`flex justify-between items-center p-4 transition-colors ${
+      isLast ? "" : "border-b border-black/5 dark:border-white/10"
+    }`}
+  >
+    <div className="flex items-center gap-3 text-[#0B192C]/60 dark:text-gray-400">
+      <Icon size={18} className="text-orange-500" />
+      <span className="text-sm font-semibold">{label}</span>
     </div>
-    <span style={{ fontSize: "1rem", fontWeight: 800, color: textColor }}>{value}</span>
+    <span className="text-base font-bold text-[#0B192C] dark:text-white">
+      {value}
+    </span>
   </div>
 );
 
 const ProfileAnalytics: React.FC<ProfileAnalyticsProps> = ({ profileUser, followerCount }) => {
-  const { theme } = useTheme();
-  
-  const isDark = theme === "dark";
-  const cardBg = isDark ? "#1e293b" : "#ffffff";
-  const borderColor = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.08)";
-  const textColor = isDark ? "#f8fafc" : "#0f172a";
-  const mutedText = isDark ? "#94a3b8" : "#64748b";
-  const tagBg = isDark ? "rgba(99, 102, 241, 0.15)" : "#e0e7ff";
-  const accentColor = "#6366f1";
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+    <div className="flex flex-col gap-4">
       
-      {/* Analytics Sequence Card */}
-      <div style={{ backgroundColor: cardBg, borderRadius: "16px", border: `1px solid ${borderColor}`, padding: "20px" }}>
-        <h3 style={{ margin: "0 0 8px 0", fontSize: "0.95rem", fontWeight: 700, color: textColor, display: "flex", alignItems: "center", gap: "8px" }}>
-          <Activity size={18} /> Activity Overview
-        </h3>
+      {/* Activity Overview Card */}
+      <div className="bg-white/70 dark:bg-[#15233B]/70 backdrop-blur-md border border-white/80 dark:border-white/10 shadow-[0_8px_30px_rgb(249,115,22,0.06)] rounded-2xl overflow-hidden transition-colors duration-300">
         
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <StatRow icon={Users} value={followerCount} label="Followers" borderColor={borderColor} mutedText={mutedText} textColor={textColor} />
-          <StatRow icon={Users} value={profileUser.totalFollowing || 0} label="Following" borderColor={borderColor} mutedText={mutedText} textColor={textColor} />
-          <StatRow icon={Eye} value={profileUser.totalReads || 0} label="Total Views" borderColor={borderColor} mutedText={mutedText} textColor={textColor} />
-          <StatRow icon={Heart} value={"--"} label="Total Likes" borderColor={borderColor} mutedText={mutedText} textColor={textColor} isLast={true} />
+        {/* Header */}
+        <div className="p-4 border-b border-black/5 dark:border-white/10 flex items-center gap-2">
+          <Activity size={18} className="text-orange-500" />
+          <h3 className="text-base font-bold text-[#0B192C] dark:text-white font-sans m-0">
+            Activity Overview
+          </h3>
+        </div>
+        
+        {/* Stats List */}
+        <div className="flex flex-col">
+          <StatRow icon={Users} value={followerCount} label="Followers" />
+          <StatRow icon={Users} value={profileUser.totalFollowing || 0} label="Following" />
+          <StatRow icon={Eye} value={profileUser.totalReads || 0} label="Total Views" />
+          <StatRow icon={Heart} value={"--"} label="Total Likes" isLast={true} />
         </div>
       </div>
 
-      {/* Top Tags Widget (Future) */}
-      <div style={{ backgroundColor: cardBg, borderRadius: "16px", border: `1px solid ${borderColor}`, padding: "20px" }}>
-        <h3 style={{ margin: "0 0 16px 0", fontSize: "0.95rem", fontWeight: 700, color: textColor, display: "flex", alignItems: "center", gap: "8px" }}>
-          <Tag size={18} /> Top Tags
-        </h3>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+      {/* Top Tags Card */}
+      <div className="bg-white/70 dark:bg-[#15233B]/70 backdrop-blur-md border border-white/80 dark:border-white/10 shadow-[0_8px_30px_rgb(249,115,22,0.06)] rounded-2xl overflow-hidden transition-colors duration-300">
+        
+        {/* Header */}
+        <div className="p-4 border-b border-black/5 dark:border-white/10 flex items-center gap-2">
+          <Tag size={18} className="text-orange-500" />
+          <h3 className="text-base font-bold text-[#0B192C] dark:text-white font-sans m-0">
+            Top Tags
+          </h3>
+        </div>
+        
+        {/* Tags List */}
+        <div className="p-4 flex flex-wrap gap-2">
           {["react", "typescript", "frontend"].map((tag) => (
-            <span key={tag} style={{ color: accentColor, backgroundColor: tagBg, padding: "6px 12px", borderRadius: "16px", fontSize: "0.85rem", fontWeight: 600 }}>
+            <span 
+              key={tag} 
+              className="px-3 py-1.5 text-xs font-semibold rounded-full bg-orange-50 text-orange-600 border border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20"
+            >
               #{tag}
             </span>
           ))}

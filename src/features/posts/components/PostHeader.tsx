@@ -41,7 +41,8 @@ export default function PostHeader({
   return (
     <header className="flex min-w-0 items-center justify-between gap-3">
       <div className="flex min-w-0 items-center gap-3">
-        <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full border border-blue-100 bg-blue-50 dark:border-slate-700 dark:bg-slate-800">
+        {/* Avatar Wrapper - Warm colors */}
+        <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full border border-stone-200 bg-stone-100 dark:border-white/10 dark:bg-stone-800">
           {avatarUrl ? (
             <img
               src={avatarUrl}
@@ -50,7 +51,7 @@ export default function PostHeader({
               loading="lazy"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-blue-700 dark:text-blue-300">
+            <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-stone-600 dark:text-stone-300">
               {displayName.charAt(0).toUpperCase()}
             </div>
           )}
@@ -58,14 +59,14 @@ export default function PostHeader({
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-x-2">
-            <span className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+            <span className="truncate text-sm font-semibold text-stone-900 dark:text-stone-100">
               {displayName}
             </span>
 
             {username && (
               <Link
                 to={`/profile/${encodeURIComponent(username)}`}
-                className="truncate text-sm text-blue-600 transition hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                className="truncate text-sm text-orange-500 transition hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300"
               >
                 @{username}
               </Link>
@@ -73,7 +74,7 @@ export default function PostHeader({
           </div>
 
           {publishedAt && (
-            <div className="mt-1 flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+            <div className="mt-1 flex items-center gap-1 text-xs text-stone-500 dark:text-stone-400">
               <CalendarDays size={13} aria-hidden="true" />
               <time dateTime={String(post.publishDate || post.createdAt)}>
                 {publishedAt}
@@ -97,8 +98,8 @@ export default function PostHeader({
           disabled={isFollowingLoading}
           className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
             isFollowing
-              ? "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-blue-300 dark:hover:bg-slate-700"
-              : "border-blue-600 bg-blue-600 text-white hover:bg-blue-700 dark:border-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600"
+              ? "border-orange-200 bg-orange-50 text-orange-600 hover:bg-orange-100 dark:border-orange-500/30 dark:bg-orange-500/10 dark:text-orange-400 dark:hover:bg-orange-500/20"
+              : "border-orange-500 bg-orange-500 text-white hover:bg-orange-600 dark:border-orange-500 dark:bg-orange-500 dark:hover:bg-orange-600 shadow-sm shadow-orange-500/20"
           }`}
         >
           {isFollowingLoading ? (

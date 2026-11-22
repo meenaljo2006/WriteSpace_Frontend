@@ -7,13 +7,6 @@ const TrendingSidebar: React.FC = () => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  const cardBg = isDark ? "#1e293b" : "#ffffff";
-  const borderColor = isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.08)";
-  const textColor = isDark ? "#f1f5f9" : "#0f172a";
-  const mutedText = isDark ? "#94a3b8" : "#64748b";
-  const accentColor = "#6366f1";
-  const hoverBg = isDark ? "rgba(255, 255, 255, 0.04)" : "rgba(0, 0, 0, 0.03)";
-
   const trendingTopics = [
     { tag: "MERN_Stack_2026", posts: "1.2K Discussions" },
     { tag: "System_Design", posts: "830 Responses" },
@@ -23,65 +16,50 @@ const TrendingSidebar: React.FC = () => {
   ];
 
   const handleComingSoon = () => {
-    toast.info("Tranding topics fetures coming soon!", { theme: isDark ? "dark" : "light" });
+    toast.info("Trending topics feature coming soon!", { theme: isDark ? "dark" : "light" });
   };
 
   return (
-    <aside style={{ 
-      backgroundColor: cardBg,
-      borderRadius: "12px",
-      border: `1px solid ${borderColor}`,
-      color: textColor,
-      boxShadow: isDark ? "0 4px 6px rgba(0,0,0,0.2)" : "0 1px 3px rgba(0,0,0,0.05)",
-      overflow: "hidden"
-    }}>
-      <div style={{ padding: "16px", borderBottom: `1px solid ${borderColor}`, display: "flex", alignItems: "center", gap: "8px" }}>
-        <TrendingUp size={18} color={accentColor} />
-        <h3 style={{ fontSize: "1rem", fontWeight: "700", margin: 0, fontFamily: "Inter, sans-serif" }}>
-          Trending Topicspace
+    <aside className="bg-white/70 dark:bg-[#15233B]/70 backdrop-blur-md border border-white/80 dark:border-white/10 shadow-[0_8px_30px_rgb(249,115,22,0.06)] rounded-2xl overflow-hidden transition-colors duration-300">
+      
+      {/* Header */}
+      <div className="p-4 border-b border-black/5 dark:border-white/10 flex items-center gap-2">
+        <TrendingUp size={18} className="text-orange-500" />
+        <h3 className="text-base font-bold text-[#0B192C] dark:text-white font-sans m-0">
+          Trending Topics
         </h3>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column" }}>
+      {/* List */}
+      <div className="flex flex-col">
         {trendingTopics.map((item, idx) => (
           <div 
             key={idx}
             onClick={handleComingSoon}
-            style={{
-              padding: "12px 16px",
-              display: "flex", 
-              alignItems: "center",
-              justifyContent: "space-between",
-              cursor: "pointer",
-              transition: "background-color 0.2s ease",
-              borderBottom: idx !== trendingTopics.length - 1 ? `1px solid ${borderColor}` : 'none'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = hoverBg} 
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+            className="p-4 flex items-center justify-between cursor-pointer transition-colors hover:bg-orange-50 dark:hover:bg-orange-500/10 group border-b border-black/5 dark:border-white/10 last:border-none"
           >
-            <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-              <span style={{ color: mutedText, fontWeight: "600", fontSize: "0.85rem", opacity: 0.7 }}>
+            <div className="flex gap-3 items-center">
+              <span className="text-[#0B192C]/40 dark:text-gray-500 font-semibold text-sm">
                 0{idx + 1}
               </span>
-              <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                <span style={{ fontWeight: "600", fontSize: "0.9rem", color: textColor }}>
+              <div className="flex flex-col gap-1">
+                <span className="font-semibold text-sm text-[#0B192C] dark:text-gray-200 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
                   #{item.tag}
                 </span>
-                <span style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "0.75rem", color: mutedText }}>
+                <span className="flex items-center gap-1 text-xs text-[#0B192C]/60 dark:text-gray-400">
                   <MessageSquare size={12} /> {item.posts}
                 </span>
               </div>
             </div>
-            <ChevronRight size={16} color={mutedText} style={{ opacity: 0.5 }} />
+            <ChevronRight size={16} className="text-gray-400 group-hover:text-orange-500 transition-colors" />
           </div>
         ))}
       </div>
       
+      {/* Footer */}
       <div 
         onClick={handleComingSoon}
-        style={{ padding: "12px 16px", borderTop: `1px solid ${borderColor}`, color: accentColor, fontSize: "0.85rem", fontWeight: "600", cursor: "pointer", transition: "background-color 0.2s" }}
-        onMouseOver={(e) => e.currentTarget.style.backgroundColor = hoverBg} 
-        onMouseOut={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+        className="p-4 border-t border-black/5 dark:border-white/10 text-orange-500 dark:text-orange-400 text-sm font-semibold cursor-pointer transition-colors hover:bg-orange-50 dark:hover:bg-orange-500/10 text-center"
       >
         Show more
       </div>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { MapPin, Calendar, Edit3, Globe, Mail, Plus, X, Share2, Link as LinkIcon, MessageSquare } from "lucide-react";
+import { MapPin, Calendar, Edit3, Globe, Plus, X, Share2, Link as LinkIcon, MessageSquare } from "lucide-react";
 import { FaGithub, FaTwitter, FaLinkedin, FaInstagram, FaYoutube, FaFacebook } from "react-icons/fa";
 import { FaXTwitter, FaLinkedinIn, FaFacebookF, FaWhatsapp, FaRedditAlien } from "react-icons/fa6";
 import { SiLeetcode, SiCodeforces, SiGeeksforgeeks } from "react-icons/si";
@@ -24,15 +24,16 @@ const ProfileIdentity: React.FC<ProfileIdentityProps> = ({ profileUser, isOwnPro
   const navigate = useNavigate();
   
   const [isBioModalOpen, setIsBioModalOpen] = useState<boolean>(false);
-  const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false); // 🔥 NEW State
+  const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false);
 
   const isDark = theme === "dark";
   const cardBg = isDark ? "#1e293b" : "#ffffff";
   const borderColor = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.08)";
   const textColor = isDark ? "#f8fafc" : "#0f172a";
   const mutedText = isDark ? "#94a3b8" : "#64748b";
-  const accentColor = "#6366f1";
-  const primaryAction = isDark ? "#818cf8" : "#3b82f6"; 
+  
+  const accentColor = "#F97316"; 
+  const primaryAction = "#F97316"; 
 
   const socials = [
     { name: "Website", url: profileUser.website, icon: Globe, color: isDark ? "#818cf8" : "#4f46e5" },
@@ -70,7 +71,7 @@ const ProfileIdentity: React.FC<ProfileIdentityProps> = ({ profileUser, isOwnPro
     }
   };
 
-    const handleMessageClick = async () => {
+  const handleMessageClick = async () => {
     try {
       const { id } = await ChatAPI.startConversation(profileUser.id);
       navigate(`/messages?id=${id}`);
@@ -86,7 +87,15 @@ const ProfileIdentity: React.FC<ProfileIdentityProps> = ({ profileUser, isOwnPro
         {/* MAIN IDENTITY CARD */}
         <div style={{ backgroundColor: cardBg, borderRadius: "16px", border: `1px solid ${borderColor}`, overflow: "hidden", boxShadow: isDark ? "0 4px 20px rgba(0,0,0,0.2)" : "0 4px 12px rgba(0,0,0,0.05)" }}>
           
-          <div style={{ height: "120px", backgroundColor: isDark ? "#334155" : "#e2e8f0", backgroundImage: `url(${profileUser.bannerImageUrl})`, backgroundSize: "cover", backgroundPosition: "center" }} />
+          <div 
+            style={{ 
+              height: "120px", 
+              backgroundColor: isDark ? "#334155" : "#e2e8f0", // <-- Original Grey Colors
+              backgroundImage: profileUser.bannerImageUrl ? `url(${profileUser.bannerImageUrl})` : "none", 
+              backgroundSize: "cover", 
+              backgroundPosition: "center" 
+            }} 
+          />
           
           <div style={{ padding: "0 20px 20px 20px" }}>
             
@@ -116,7 +125,6 @@ const ProfileIdentity: React.FC<ProfileIdentityProps> = ({ profileUser, isOwnPro
                     <Edit3 size={14} /> Edit Profile
                   </button>
                 ) : (
-
                   <div style={{ display: "flex", gap: "8px" }}>
                     <button 
                       onClick={handleMessageClick} 
@@ -127,7 +135,7 @@ const ProfileIdentity: React.FC<ProfileIdentityProps> = ({ profileUser, isOwnPro
 
                     <button 
                       onClick={onToggleFollow} 
-                      style={{ padding: "6px 16px", borderRadius: "20px", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer", transition: "all 0.2s", display: "flex", alignItems: "center", gap: "6px", backgroundColor: isFollowing ? "transparent" : accentColor, border: isFollowing ? `1px solid ${borderColor}` : "none", color: isFollowing ? textColor : "#ffffff" }}
+                      style={{ padding: "6px 16px", borderRadius: "20px", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer", transition: "all 0.2s", display: "flex", alignItems: "center", gap: "6px", backgroundColor: isFollowing ? "transparent" : primaryAction, border: isFollowing ? `1px solid ${borderColor}` : "none", color: isFollowing ? textColor : "#ffffff" }}
                     >
                       {isFollowing ? "Following" : <><Plus size={14} /> Follow</>}
                     </button>
@@ -143,6 +151,7 @@ const ProfileIdentity: React.FC<ProfileIdentityProps> = ({ profileUser, isOwnPro
               <p style={{ margin: "12px 0 0 0", fontSize: "0.95rem", color: textColor, lineHeight: "1.5" }}>{profileUser.headline}</p>
             )}
 
+            {/* Location & Joined Date */}
             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", marginTop: "16px", fontSize: "0.85rem", color: mutedText }}>
               {profileUser.location && (
                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }}><MapPin size={16} /> {profileUser.location}</div>
@@ -151,6 +160,49 @@ const ProfileIdentity: React.FC<ProfileIdentityProps> = ({ profileUser, isOwnPro
                 <Calendar size={16} /> Joined {profileUser.createdAt ? new Date(profileUser.createdAt).toLocaleDateString(undefined, { month: "short", year: "numeric" }) : "Recently"}
               </div>
             </div>
+
+            {/* ================= SOCIAL LINKS ================= */}
+            {socials.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "20px" }}>
+                {socials.map((social) => {
+                  const Icon = social.icon;
+                  return (
+                    <a
+                      key={social.name}
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "6px 12px",
+                        borderRadius: "20px",
+                        backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#f8fafc",
+                        border: `1px solid ${borderColor}`,
+                        color: textColor,
+                        fontSize: "0.8rem",
+                        fontWeight: 500,
+                        textDecoration: "none",
+                        transition: "all 0.2s ease"
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.borderColor = "#F97316"; 
+                        e.currentTarget.style.color = "#F97316"; 
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.borderColor = borderColor;
+                        e.currentTarget.style.color = textColor;
+                      }}
+                    >
+                      <Icon size={14} color={social.color} />
+                      {social.name}
+                    </a>
+                  );
+                })}
+              </div>
+            )}
+
           </div>
         </div>
 
@@ -171,47 +223,6 @@ const ProfileIdentity: React.FC<ProfileIdentityProps> = ({ profileUser, isOwnPro
                 </span>
               )}
             </p>
-          </div>
-        )}
-
-        {/* CONNECT (Social Links) */}
-        {(socials.length > 0 || profileUser.email) && (
-          <div style={{ backgroundColor: cardBg, borderRadius: "16px", border: `1px solid ${borderColor}`, padding: "20px" }}>
-            <h3 style={{ margin: "0 0 16px 0", fontSize: "0.95rem", fontWeight: 700, color: textColor }}>Connect</h3>
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-              
-              {socials.map((social) => {
-                const safeUrl = social.url && /^https?:\/\//i.test(social.url) ? social.url : `https://${social.url}`;
-                
-                return (
-                  <a 
-                    key={social.name} 
-                    href={safeUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    style={{ width: "44px", height: "44px", borderRadius: "12px", backgroundColor: isDark ? "#0f172a" : "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }} 
-                    title={social.name}
-                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = isDark ? "#334155" : "#e2e8f0"} 
-                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = isDark ? "#0f172a" : "#f1f5f9"}
-                  >
-                    <social.icon size={20} color={social.color} />
-                  </a>
-                );
-              })}
-
-              {profileUser.email && (
-                <a 
-                  href={`mailto:${profileUser.email}`} 
-                  style={{ width: "44px", height: "44px", borderRadius: "12px", backgroundColor: isDark ? "#0f172a" : "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }} 
-                  title="Email"
-                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = isDark ? "#334155" : "#e2e8f0"} 
-                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = isDark ? "#0f172a" : "#f1f5f9"}
-                >
-                  <Mail size={20} color="#EA4335" />
-                </a>
-              )}
-
-            </div>
           </div>
         )}
       </div>
@@ -240,6 +251,7 @@ const ProfileIdentity: React.FC<ProfileIdentityProps> = ({ profileUser, isOwnPro
         document.body
       )}
 
+      {/* SHARE MODAL */}
       {isShareModalOpen && createPortal(
         <div onClick={() => setIsShareModalOpen(false)} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.6)", zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", animation: "fadeIn 0.2s", padding: "16px" }}>
           <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: cardBg, borderRadius: "16px", width: "100%", maxWidth: "420px", padding: "24px", boxShadow: "0 25px 50px rgba(0,0,0,0.3)", position: "relative" }}>

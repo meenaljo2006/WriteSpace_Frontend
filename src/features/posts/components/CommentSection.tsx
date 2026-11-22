@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { LoaderCircle, Send, User} from "lucide-react";
+import { LoaderCircle, Send, User } from "lucide-react";
 import { toast } from "react-toastify";
 
 import { useAuth } from "@/app/providers/AuthProvider";
@@ -26,7 +26,6 @@ export default function CommentSection({ postId, postAuthorId }: CommentSectionP
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSubmittingRef = useRef(false);
 
-  // Prevent duplicate pagination requests and ignore stale fetch results.
   const loadingMoreRef = useRef(false);
   const requestGenerationRef = useRef(0);
 
@@ -44,30 +43,22 @@ export default function CommentSection({ postId, postAuthorId }: CommentSectionP
       const requestGeneration = requestGenerationRef.current;
 
       try {
-        const response = await InteractionsAPI.getTopLevelComments(
-          postId,
-          cursor,
-        );
+        const response = await InteractionsAPI.getTopLevelComments(postId, cursor);
 
-        // Ignore results belonging to an earlier post/request generation.
         if (requestGeneration !== requestGenerationRef.current) return;
 
         setComments((previous) => {
           if (!cursor) return response.comments;
-
           const existingIds = new Set(previous.map((comment) => comment.id));
           return [
             ...previous,
-            ...response.comments.filter(
-              (comment) => !existingIds.has(comment.id),
-            ),
+            ...response.comments.filter((comment) => !existingIds.has(comment.id)),
           ];
         });
 
         setNextCursor(response.nextCursor);
       } catch (error: unknown) {
         if (requestGeneration !== requestGenerationRef.current) return;
-
         console.error("Failed to fetch comments", error);
         toast.error("Failed to load comments");
       } finally {
@@ -75,7 +66,6 @@ export default function CommentSection({ postId, postAuthorId }: CommentSectionP
           setIsLoading(false);
           setIsLoadingMore(false);
         }
-
         if (cursor) {
           loadingMoreRef.current = false;
         }
@@ -97,7 +87,6 @@ export default function CommentSection({ postId, postAuthorId }: CommentSectionP
     void fetchTopLevelComments();
 
     return () => {
-      // Any outstanding request from this effect becomes stale.
       requestGenerationRef.current += 1;
       loadingMoreRef.current = false;
     };
@@ -113,7 +102,6 @@ export default function CommentSection({ postId, postAuthorId }: CommentSectionP
 
     if (!content) return;
     isSubmittingRef.current = true;
-
     setIsSubmitting(true);
 
     try {
@@ -151,7 +139,7 @@ export default function CommentSection({ postId, postAuthorId }: CommentSectionP
   };
 
   return (
-    <section className="mt-4 border-t border-blue-100 pt-4 dark:border-slate-700">
+    <section className="mt-4 border-t border-stone-200/60 pt-4 dark:border-white/10">
       <form
         className="flex min-w-0 items-center gap-2 sm:gap-3"
         onSubmit={(event) => {
@@ -160,7 +148,7 @@ export default function CommentSection({ postId, postAuthorId }: CommentSectionP
           void handleAddTopLevelComment();
         }}
       >
-        <div className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-blue-100 bg-blue-50 text-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-blue-300 sm:size-9">
+        <div className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-stone-200 bg-stone-100 text-stone-600 dark:border-white/10 dark:bg-white/5 dark:text-stone-300 sm:size-9">
           {authUser?.profileImageUrl ? (
             <img
               src={authUser.profileImageUrl}
@@ -172,7 +160,7 @@ export default function CommentSection({ postId, postAuthorId }: CommentSectionP
           )}
         </div>
 
-        <div className="flex min-w-0 flex-1 items-center gap-1 rounded-full border border-blue-100 bg-slate-50 py-1 pl-3 pr-1 transition-colors focus-within:border-blue-300 focus-within:ring-2 focus-within:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:focus-within:border-blue-700 dark:focus-within:ring-blue-950 sm:pl-4">
+        <div className="flex min-w-0 flex-1 items-center gap-1 rounded-full border border-stone-200/80 bg-stone-100/50 py-1 pl-3 pr-1 transition-colors focus-within:border-orange-500/50 focus-within:ring-2 focus-within:ring-orange-500/20 dark:border-white/10 dark:bg-black/20 dark:focus-within:border-orange-500/50 sm:pl-4">
           <label htmlFor={`comment-input-${postId}`} className="sr-only">
             Add a comment
           </label>
@@ -185,14 +173,14 @@ export default function CommentSection({ postId, postAuthorId }: CommentSectionP
             maxLength={2500}
             onChange={(event) => setCommentText(event.target.value)}
             disabled={isSubmitting}
-            className="min-w-0 flex-1 bg-transparent py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 disabled:opacity-60 dark:text-slate-100 dark:placeholder:text-slate-500"
+            className="min-w-0 flex-1 bg-transparent py-2 text-sm text-stone-800 outline-none placeholder:text-stone-400 disabled:opacity-60 dark:text-stone-100 dark:placeholder:text-stone-500"
           />
 
           <button
             type="submit"
             disabled={!commentText.trim() || isSubmitting}
             aria-label="Post comment"
-            className="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-blue-600 transition-colors hover:bg-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-40 dark:text-blue-300 dark:hover:bg-slate-700"
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-orange-500 transition-colors hover:bg-orange-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:cursor-not-allowed disabled:opacity-40 dark:text-orange-400 dark:hover:bg-orange-500/10"
           >
             {isSubmitting ? (
               <LoaderCircle size={18} className="animate-spin" />
@@ -206,14 +194,14 @@ export default function CommentSection({ postId, postAuthorId }: CommentSectionP
       <div className="mt-4 space-y-1">
         {isLoading ? (
           <div
-            className="flex justify-center py-6 text-blue-600 dark:text-blue-300"
+            className="flex justify-center py-6 text-orange-500 dark:text-orange-400"
             role="status"
             aria-label="Loading comments"
           >
             <LoaderCircle size={24} className="animate-spin" />
           </div>
         ) : comments.length === 0 ? (
-          <p className="py-6 text-center text-sm text-slate-500 dark:text-slate-400">
+          <p className="py-6 text-center text-sm text-stone-500 dark:text-stone-400">
             No comments yet. Be the first to share your thoughts!
           </p>
         ) : (
@@ -234,7 +222,7 @@ export default function CommentSection({ postId, postAuthorId }: CommentSectionP
                   type="button"
                   onClick={() => void fetchTopLevelComments(nextCursor)}
                   disabled={isLoadingMore}
-                  className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-blue-300 dark:hover:bg-slate-800"
+                  className="inline-flex items-center gap-2 rounded-full border border-stone-200/80 bg-white/50 px-4 py-2 text-sm font-semibold text-orange-600 transition-colors hover:bg-orange-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-[#15233B]/50 dark:text-orange-400 dark:hover:bg-orange-500/10"
                 >
                   {isLoadingMore && (
                     <LoaderCircle size={15} className="animate-spin" />

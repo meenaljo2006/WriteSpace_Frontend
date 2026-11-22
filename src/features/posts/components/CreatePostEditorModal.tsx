@@ -1,4 +1,5 @@
 import React, { useState, useEffect, type KeyboardEvent } from "react";
+import { createPortal } from "react-dom";
 import { Link as RouterLink } from "react-router-dom";
 import {
   User,
@@ -14,6 +15,8 @@ import {
   Link as LinkIcon,
   Save,
   Sparkles,
+  ChevronDown,
+  AlertTriangle,
 } from "lucide-react";
 import { AIAPI, type PostAssistantResult } from "@/features/ai/ai.api";
 import { useTheme } from "@/app/providers/ThemeProvider";
@@ -80,23 +83,17 @@ const CreatePostEditor: React.FC<CreatePostEditorProps> = ({
 
   const [isExpanded, setIsExpanded] = useState(isEditMode || initiallyExpanded);
   const [isDraftLoaded, setIsDraftLoaded] = useState(false);
-  const [draftStatus, setDraftStatus] = useState<"Saving..." | "Saved" | "">(
-    "",
-  );
+  const [draftStatus, setDraftStatus] = useState<"Saving..." | "Saved" | "">("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [postStatus, setPostStatus] = useState<
-    "draft" | "scheduled" | "published"
-  >(
+  const [postStatus, setPostStatus] = useState<"draft" | "scheduled" | "published">(
     editPost?.status === "scheduled" || editPost?.status === "published"
       ? editPost.status
-      : "draft",
+      : "draft"
   );
 
   const [scheduledAt, setScheduledAt] = useState(
-    editPost?.scheduledAt
-      ? new Date(editPost.scheduledAt).toISOString().slice(0, 16)
-      : "",
+    editPost?.scheduledAt ? new Date(editPost.scheduledAt).toISOString().slice(0, 16) : ""
   );
 
   const [title, setTitle] = useState(editPost?.title || "");
@@ -109,37 +106,23 @@ const CreatePostEditor: React.FC<CreatePostEditorProps> = ({
 
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
-  const [existingMedia, setExistingMedia] = useState<string[]>(
-    editPost?.media || [],
-  );
+  const [existingMedia, setExistingMedia] = useState<string[]>(editPost?.media || []);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
-  const [bannerPreview, setBannerPreview] = useState<string | null>(
-    editPost?.coverImageUrl || null,
-  );
-  const [existingMediaPublicIds, setExistingMediaPublicIds] = useState<
-    string[]
-  >(editPost?.mediaPublicIds || []);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(editPost?.coverImageUrl || null);
+  const [existingMediaPublicIds, setExistingMediaPublicIds] = useState<string[]>(editPost?.mediaPublicIds || []);
 
   const [codeSnippets, setCodeSnippets] = useState<CodeSnippet[]>(() =>
     (editPost?.codeSnippets || []).map((snippet) => ({
       id: crypto.randomUUID(),
       language: snippet.language,
       code: snippet.code,
-    })),
+    }))
   );
 
   const [tags, setTags] = useState<string[]>(editPost?.tags || []);
   const [tagInput, setTagInput] = useState("");
 
-  const cardBg = isDark ? "#1e293b" : "#ffffff";
-  const borderColor = isDark
-    ? "rgba(255, 255, 255, 0.1)"
-    : "rgba(0, 0, 0, 0.08)";
-  const textColor = isDark ? "#f1f5f9" : "#0f172a";
-  const mutedText = isDark ? "#94a3b8" : "#64748b";
-  const accentColor = "#6366f1";
-  const linkColor = "#3b82f6";
-  const inputBg = isDark ? "rgba(0,0,0,0.2)" : "#f8fafc";
+  const linkColor = "#f97316"; 
 
   const editor = useEditor({
     extensions: [
@@ -157,8 +140,7 @@ const CreatePostEditor: React.FC<CreatePostEditorProps> = ({
     content: editPost?.content || "",
     editorProps: {
       attributes: {
-        class: "focus:outline-none min-h-[120px]",
-        style: `color: ${textColor}; min-height: 120px; outline: none; font-size: 1rem; line-height: 1.6;`,
+        class: "focus:outline-none min-h-[200px] text-stone-800 dark:text-stone-200 text-base leading-relaxed",
       },
     },
   });
@@ -169,32 +151,19 @@ const CreatePostEditor: React.FC<CreatePostEditorProps> = ({
       setIsDraftLoaded(true);
       return;
     }
-
     if (!editor || isDraftLoaded) return;
 
     const savedDraft = localStorage.getItem("writespace_draft");
-
     if (savedDraft) {
       try {
         const parsed = JSON.parse(savedDraft) as DraftState;
-
         if (parsed.title) setTitle(parsed.title);
         if (parsed.subtitle) setSubtitle(parsed.subtitle);
         if (Array.isArray(parsed.tags)) setTags(parsed.tags);
-        if (Array.isArray(parsed.codeSnippets)) {
-          setCodeSnippets(parsed.codeSnippets);
-        }
-        if (parsed.content) {
-          editor.commands.setContent(parsed.content);
-        }
+        if (Array.isArray(parsed.codeSnippets)) setCodeSnippets(parsed.codeSnippets);
+        if (parsed.content) editor.commands.setContent(parsed.content);
 
-        if (
-          parsed.title ||
-          parsed.subtitle ||
-          parsed.content ||
-          parsed.tags?.length ||
-          parsed.codeSnippets?.length
-        ) {
+        if (parsed.title || parsed.subtitle || parsed.content || parsed.tags?.length || parsed.codeSnippets?.length) {
           setDraftStatus("Saved");
         }
       } catch (error: unknown) {
@@ -202,7 +171,6 @@ const CreatePostEditor: React.FC<CreatePostEditorProps> = ({
         localStorage.removeItem("writespace_draft");
       }
     }
-
     setIsDraftLoaded(true);
   }, [editor, isDraftLoaded, isEditMode]);
 
@@ -212,14 +180,7 @@ const CreatePostEditor: React.FC<CreatePostEditorProps> = ({
 
     const liveHtml = editor?.getHTML() || "";
     const liveText = editor?.getText() || "";
-
-    const hasContent = Boolean(
-      title.trim() ||
-      subtitle.trim() ||
-      liveText.trim() ||
-      codeSnippets.length ||
-      tags.length,
-    );
+    const hasContent = Boolean(title.trim() || subtitle.trim() || liveText.trim() || codeSnippets.length || tags.length);
 
     if (!hasContent) {
       localStorage.removeItem("writespace_draft");
@@ -228,100 +189,56 @@ const CreatePostEditor: React.FC<CreatePostEditorProps> = ({
     }
 
     setDraftStatus("Saving...");
-
     const saveTimer = window.setTimeout(() => {
-      const draft: DraftState = {
-        title,
-        subtitle,
-        content: liveHtml,
-        tags,
-        codeSnippets,
-      };
-
+      const draft: DraftState = { title, subtitle, content: liveHtml, tags, codeSnippets };
       localStorage.setItem("writespace_draft", JSON.stringify(draft));
       setDraftStatus("Saved");
     }, 1000);
 
     return () => window.clearTimeout(saveTimer);
-  }, [
-    title,
-    subtitle,
-    tags,
-    codeSnippets,
-    isExpanded,
-    isDraftLoaded,
-    isEditMode,
-    editor,
-  ]);
+  }, [title, subtitle, tags, codeSnippets, isExpanded, isDraftLoaded, isEditMode, editor]);
 
-  // Lock background scrolling while the modal is open and restore
-  // the previous value when it closes or unmounts.
+  // Lock background scrolling
   useEffect(() => {
     if (!isExpanded) return;
-
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
+    return () => { document.body.style.overflow = previousOverflow; };
   }, [isExpanded]);
 
   const resetForm = () => {
     localStorage.removeItem("writespace_draft");
-
     setTitle("");
     setSubtitle("");
     setTags([]);
     setTagInput("");
     setPostStatus("draft");
     setScheduledAt("");
-
     mediaPreviews.forEach((url) => URL.revokeObjectURL(url));
     setMediaFiles([]);
     setMediaPreviews([]);
     setExistingMedia([]);
     setExistingMediaPublicIds([]);
     setCodeSnippets([]);
-
     editor?.commands.setContent("");
-
     setDraftStatus("");
     setIsExpanded(false);
-
-    if (bannerPreview && bannerFile) {
-      URL.revokeObjectURL(bannerPreview);
-    }
-
+    if (bannerPreview && bannerFile) URL.revokeObjectURL(bannerPreview);
     setBannerFile(null);
     setBannerPreview(null);
   };
 
   const handleDiscard = () => {
     if (isSubmitting) return;
-
     if (isEditMode) {
       onCloseEdit?.();
       return;
     }
-
     const liveText = editor?.getText() || "";
-
     const hasUnsavedContent = Boolean(
-      title.trim() ||
-      subtitle.trim() ||
-      liveText.trim() ||
-      mediaFiles.length ||
-      codeSnippets.length ||
-      tags.length ||
-      existingMedia.length ||
-      bannerFile,
+      title.trim() || subtitle.trim() || liveText.trim() || mediaFiles.length || codeSnippets.length || tags.length || existingMedia.length || bannerFile
     );
-
-    if (hasUnsavedContent && !window.confirm("Discard draft?")) {
-      return;
-    }
-
+    if (hasUnsavedContent && !window.confirm("Discard draft?")) return;
     resetForm();
     onCloseCreate?.();
   };
@@ -329,27 +246,10 @@ const CreatePostEditor: React.FC<CreatePostEditorProps> = ({
   const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" || event.key === ",") {
       event.preventDefault();
-
-      const newTag = tagInput
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, "");
-
-      if (!newTag) {
-        setTagInput("");
-        return;
-      }
-
-      if (tags.includes(newTag)) {
-        setTagInput("");
-        return;
-      }
-
-      if (tags.length >= 5) {
-        toast.warning("Maximum 5 tags allowed.");
-        return;
-      }
-
+      const newTag = tagInput.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+      if (!newTag) { setTagInput(""); return; }
+      if (tags.includes(newTag)) { setTagInput(""); return; }
+      if (tags.length >= 5) { toast.warning("Maximum 5 tags allowed."); return; }
       setTags((previous) => [...previous, newTag]);
       setTagInput("");
     } else if (event.key === "Backspace" && !tagInput && tags.length > 0) {
@@ -363,33 +263,21 @@ const CreatePostEditor: React.FC<CreatePostEditorProps> = ({
 
   const handleGenerateAiSuggestions = async () => {
     const content = editor?.getText().trim() ?? "";
-
-    if (!content) {
-      toast.info("Write some content before generating AI suggestions.");
-      return;
-    }
+    if (!content) { toast.info("Write some content before generating AI suggestions."); return; }
 
     setIsAiLoading(true);
     setAiResult(null);
-
     try {
       const result = await AIAPI.generatePostAssistant({
         title: title.trim() || undefined,
         content,
         instruction: aiInstruction.trim() || undefined,
       });
-
       setAiResult(result);
       toast.success("AI suggestions generated.");
     } catch (error) {
-      const message =
-        error instanceof AxiosError
-          ? (error.response?.data as { message?: string } | undefined)?.message
-          : undefined;
-
-      toast.error(
-        message || "Unable to generate AI suggestions. Please try again.",
-      );
+      const message = error instanceof AxiosError ? (error.response?.data as { message?: string } | undefined)?.message : undefined;
+      toast.error(message || "Unable to generate AI suggestions. Please try again.");
     } finally {
       setIsAiLoading(false);
     }
@@ -397,135 +285,64 @@ const CreatePostEditor: React.FC<CreatePostEditorProps> = ({
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
-
     const finalHtml = editor?.getHTML() || "";
     const finalText = editor?.getText() || "";
     const finalTitle = title.trim();
 
-    if (finalTitle.length < 5) {
-      toast.error("Title must be at least 5 characters.");
-      return;
+    if (finalTitle.length < 5) { toast.error("Title must be at least 5 characters."); return; }
+    if (finalText.trim().length < 10 && codeSnippets.length === 0 && mediaFiles.length === 0 && existingMedia.length === 0) {
+      toast.error("Content must be at least 10 characters or include media/code."); return;
     }
-
-    if (
-      finalText.trim().length < 10 &&
-      codeSnippets.length === 0 &&
-      mediaFiles.length === 0 &&
-      existingMedia.length === 0
-    ) {
-      toast.error(
-        "Content must be at least 10 characters or include media/code.",
-      );
-      return;
-    }
-
     if (postStatus === "scheduled") {
-      if (!scheduledAt) {
-        toast.error("Please select a schedule date and time.");
-        return;
-      }
-
+      if (!scheduledAt) { toast.error("Please select a schedule date and time."); return; }
       const scheduledDate = new Date(scheduledAt);
-
-      if (
-        Number.isNaN(scheduledDate.getTime()) ||
-        scheduledDate <= new Date()
-      ) {
-        toast.error("Scheduled time must be in the future.");
-        return;
+      if (Number.isNaN(scheduledDate.getTime()) || scheduledDate <= new Date()) {
+        toast.error("Scheduled time must be in the future."); return;
       }
     }
 
     setIsSubmitting(true);
-
     try {
       const formData = new FormData();
-
       formData.append("title", finalTitle);
-
-      if (subtitle.trim()) {
-        formData.append("subtitle", subtitle.trim());
-      }
-
+      if (subtitle.trim()) formData.append("subtitle", subtitle.trim());
       formData.append("content", finalHtml);
       formData.append("status", postStatus);
-
-      if (postStatus === "scheduled") {
-        formData.append("scheduledAt", new Date(scheduledAt).toISOString());
-      }
-
-      if (bannerFile) {
-        formData.append("banner", bannerFile);
-      }
-
-      if (tags.length > 0) {
-        formData.append("tags", JSON.stringify(tags));
-      }
-
+      if (postStatus === "scheduled") formData.append("scheduledAt", new Date(scheduledAt).toISOString());
+      if (bannerFile) formData.append("banner", bannerFile);
+      if (tags.length > 0) formData.append("tags", JSON.stringify(tags));
       if (codeSnippets.length > 0) {
-        const cleanSnippets = codeSnippets.map(({ language, code }) => ({
-          language,
-          code,
-        }));
-
+        const cleanSnippets = codeSnippets.map(({ language, code }) => ({ language, code }));
         formData.append("codeSnippets", JSON.stringify(cleanSnippets));
       }
-
       if (isEditMode) {
-        existingMedia.forEach((url) => {
-          formData.append("existingMedia", url);
-        });
-
-        existingMediaPublicIds.forEach((publicId) => {
-          formData.append("existingMediaPublicIds", publicId);
-        });
-
+        existingMedia.forEach((url) => formData.append("existingMedia", url));
+        existingMediaPublicIds.forEach((publicId) => formData.append("existingMediaPublicIds", publicId));
         if (existingMedia.length === 0 && existingMediaPublicIds.length === 0) {
           formData.append("existingMedia", JSON.stringify([]));
           formData.append("existingMediaPublicIds", JSON.stringify([]));
         }
       }
-
-      mediaFiles.forEach((file) => {
-        formData.append("media", file);
-      });
+      mediaFiles.forEach((file) => formData.append("media", file));
 
       if (isEditMode && editPost) {
         const updatedPost = await PostsAPI.updatePost(editPost.id, formData);
-
         toast.success("Post updated successfully!");
         onPostUpdated?.(updatedPost);
         onCloseEdit?.();
       } else {
         const newPost = await PostsAPI.createPost(formData);
-
-        if (postStatus === "draft") {
-          toast.success("Draft saved successfully!");
-        } else if (postStatus === "scheduled") {
-          toast.success("Post scheduled successfully!");
-        } else {
-          toast.success("Post published successfully!");
-        }
-
+        if (postStatus === "draft") toast.success("Draft saved successfully!");
+        else if (postStatus === "scheduled") toast.success("Post scheduled successfully!");
+        else toast.success("Post published successfully!");
         resetForm();
         onPostCreated?.(newPost);
         onCloseCreate?.();
       }
     } catch (error: unknown) {
       const axiosError = error as AxiosError<ApiError>;
-
-      const actionText =
-        postStatus === "draft"
-          ? "save draft"
-          : postStatus === "scheduled"
-            ? "schedule post"
-            : isEditMode
-              ? "update post"
-              : "publish post";
-
-      toast.error(
-        axiosError.response?.data?.message || `Failed to ${actionText}.`,
-      );
+      const actionText = postStatus === "draft" ? "save draft" : postStatus === "scheduled" ? "schedule post" : isEditMode ? "update post" : "publish post";
+      toast.error(axiosError.response?.data?.message || `Failed to ${actionText}.`);
     } finally {
       setIsSubmitting(false);
     }
@@ -533,1318 +350,378 @@ const CreatePostEditor: React.FC<CreatePostEditorProps> = ({
 
   const handleMediaUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-
     if (!files || files.length === 0) return;
-
     const newFiles = Array.from(files);
-
     if (mediaFiles.length + existingMedia.length + newFiles.length > 10) {
       toast.warning("You can only attach a maximum of 10 images per post.");
       event.target.value = "";
       return;
     }
-
     const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
-
     setMediaFiles((previous) => [...previous, ...newFiles]);
     setMediaPreviews((previous) => [...previous, ...newPreviews]);
-
     event.target.value = "";
   };
 
   const handleBannerUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-
     if (!file) return;
-
     const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-
     if (!allowedTypes.includes(file.type)) {
       toast.error("Only JPG, PNG, GIF, and WEBP images are allowed.");
       event.target.value = "";
       return;
     }
-
-    if (bannerPreview && bannerFile) {
-      URL.revokeObjectURL(bannerPreview);
-    }
-
+    if (bannerPreview && bannerFile) URL.revokeObjectURL(bannerPreview);
     setBannerFile(file);
     setBannerPreview(URL.createObjectURL(file));
-
     event.target.value = "";
   };
 
   const removeNewMedia = (indexToRemove: number) => {
     const preview = mediaPreviews[indexToRemove];
-
     if (preview) URL.revokeObjectURL(preview);
-
-    setMediaFiles((previous) =>
-      previous.filter((_, index) => index !== indexToRemove),
-    );
-
-    setMediaPreviews((previous) =>
-      previous.filter((_, index) => index !== indexToRemove),
-    );
+    setMediaFiles((previous) => previous.filter((_, index) => index !== indexToRemove));
+    setMediaPreviews((previous) => previous.filter((_, index) => index !== indexToRemove));
   };
 
   const removeExistingMedia = (indexToRemove: number) => {
-    setExistingMedia((previous) =>
-      previous.filter((_, index) => index !== indexToRemove),
-    );
-
-    setExistingMediaPublicIds((previous) =>
-      previous.filter((_, index) => index !== indexToRemove),
-    );
+    setExistingMedia((previous) => previous.filter((_, index) => index !== indexToRemove));
+    setExistingMediaPublicIds((previous) => previous.filter((_, index) => index !== indexToRemove));
   };
 
   const getLanguageExtension = (language: string) => {
     switch (language.toLowerCase()) {
-      case "python":
-        return [python()];
-      case "typescript":
-        return [javascript({ typescript: true })];
-      case "java":
-        return [java()];
-      case "cpp":
-        return [cpp()];
-      case "rust":
-        return [rust()];
-      case "go":
-        return [go()];
-      case "sql":
-        return [sql()];
-      default:
-        return [javascript()];
+      case "python": return [python()];
+      case "typescript": return [javascript({ typescript: true })];
+      case "java": return [java()];
+      case "cpp": return [cpp()];
+      case "rust": return [rust()];
+      case "go": return [go()];
+      case "sql": return [sql()];
+      default: return [javascript()];
     }
   };
 
   const addCodeSnippet = () => {
-    setCodeSnippets((previous) => [
-      ...previous,
-      {
-        id: crypto.randomUUID(),
-        language: "typescript",
-        code: "",
-      },
-    ]);
+    setCodeSnippets((previous) => [...previous, { id: crypto.randomUUID(), language: "typescript", code: "" }]);
   };
 
-  return (
-    <>
-      {!isExpanded && !isEditMode && (
-        <div
-          style={{
-            backgroundColor: cardBg,
-            borderRadius: "12px",
-            border: `1px solid ${borderColor}`,
-            padding: "1rem",
-            boxShadow: isDark
-              ? "0 4px 6px rgba(0,0,0,0.2)"
-              : "0 1px 3px rgba(0,0,0,0.05)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              gap: "12px",
-              alignItems: "center",
-            }}
+  if (!isExpanded && !isEditMode) {
+    return (
+      <div className="bg-white/70 dark:bg-[#15233B]/70 backdrop-blur-md border border-white/80 dark:border-white/10 rounded-2xl p-4 shadow-sm transition-colors duration-300">
+        <div className="flex gap-3 items-center">
+          <RouterLink to={`/profile/${authUser?.username}`} className="shrink-0 no-underline">
+            <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-800 flex items-center justify-center overflow-hidden">
+              {authUser?.profileImageUrl ? (
+                <img src={authUser.profileImageUrl} alt="You" className="w-full h-full object-cover" />
+              ) : (
+                <User size={20} className="text-stone-400 dark:text-stone-500" />
+              )}
+            </div>
+          </RouterLink>
+          <button
+            type="button"
+            onClick={() => setIsExpanded(true)}
+            className="flex-1 text-left px-4 py-2.5 rounded-full border border-stone-200/60 dark:border-white/10 bg-stone-100/50 dark:bg-black/20 text-stone-500 dark:text-stone-400 text-sm outline-none hover:bg-stone-200/50 dark:hover:bg-black/30 transition-colors"
           >
-            <RouterLink
-              to={`/profile/${authUser?.username}`}
-              style={{ textDecoration: "none" }}
-            >
-              <div
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "50%",
-                  flexShrink: 0,
-                  backgroundColor: isDark ? "#334155" : "#e2e8f0",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  overflow: "hidden",
-                  cursor: "pointer",
-                }}
-              >
+            Start a post...
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  return createPortal(
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm sm:p-6"
+      >
+        <motion.div
+          initial={{ scale: 0.95, y: 20 }}
+          animate={{ scale: 1, y: 0 }}
+          exit={{ scale: 0.95, y: 20 }}
+          className="relative flex h-auto max-h-[80vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-white/80 bg-white/95 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#15233B]/95"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* ================= HEADER ================= */}
+          <div className="flex shrink-0 items-center justify-between border-b border-stone-200/60 px-5 py-3 dark:border-white/10">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center overflow-hidden font-bold text-sm">
                 {authUser?.profileImageUrl ? (
-                  <img
-                    src={authUser.profileImageUrl}
-                    alt="You"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
+                  <img src={authUser.profileImageUrl} alt="You" className="w-full h-full object-cover" />
                 ) : (
-                  <User size={20} color={mutedText} />
+                  authUser?.fullname?.charAt(0) || "U"
                 )}
               </div>
-            </RouterLink>
-
-            <button
-              type="button"
-              onClick={() => setIsExpanded(true)}
-              style={{
-                flex: 1,
-                padding: "10px 16px",
-                borderRadius: "24px",
-                textAlign: "left",
-                border: `1px solid ${borderColor}`,
-                backgroundColor: inputBg,
-                color: mutedText,
-                outline: "none",
-                fontSize: "0.9rem",
-                cursor: "pointer",
-              }}
-            >
-              Start a post...
-            </button>
-          </div>
-        </div>
-      )}
-
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: "fixed",
-              inset: 0,
-              zIndex: 9990,
-              display: "flex",
-              alignItems: "flex-start",
-              justifyContent: "center",
-              paddingTop: "5vh",
-              paddingLeft: "10px",
-              paddingRight: "10px",
-              backgroundColor: isDark
-                ? "rgba(0,0,0,0.7)"
-                : "rgba(255,255,255,0.6)",
-              backdropFilter: "blur(4px)",
-            }}
-          >
-            <motion.div
-              initial={{ scale: 0.95, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 20 }}
-              style={{
-                backgroundColor: cardBg,
-                borderRadius: "12px",
-                width: "100%",
-                maxWidth: "650px",
-                maxHeight: "90vh",
-                display: "flex",
-                flexDirection: "column",
-                boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
-                overflow: "hidden",
-              }}
-            >
-              {/* Modal header */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "1rem",
-                  borderBottom: `1px solid ${borderColor}`,
-                }}
-              >
-                <RouterLink
-                  to={`/profile/${authUser?.username}`}
-                  style={{ textDecoration: "none", color: "inherit" }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "36px",
-                        height: "36px",
-                        borderRadius: "50%",
-                        backgroundColor: isDark ? "#334155" : "#e2e8f0",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        overflow: "hidden",
-                      }}
-                    >
-                      {authUser?.profileImageUrl ? (
-                        <img
-                          src={authUser.profileImageUrl}
-                          alt="You"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                        />
-                      ) : (
-                        <User size={18} color={mutedText} />
-                      )}
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "0.95rem",
-                          fontWeight: 600,
-                          color: textColor,
-                        }}
-                      >
-                        {authUser?.fullname || "User"}
-                      </span>
-
-                      <span
-                        style={{
-                          fontSize: "0.7rem",
-                          color: isEditMode
-                            ? accentColor
-                            : draftStatus === "Saved"
-                              ? "#10b981"
-                              : mutedText,
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                        }}
-                      >
-                        {isEditMode ? (
-                          "Editing Post..."
-                        ) : draftStatus === "Saved" ? (
-                          <>
-                            <CheckCircle size={10} />
-                            Saved
-                          </>
-                        ) : (
-                          draftStatus || "Draft"
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </RouterLink>
-
-                <button
-                  type="button"
-                  onClick={handleDiscard}
-                  disabled={isSubmitting}
-                  aria-label="Close editor"
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: mutedText,
-                    cursor: isSubmitting ? "not-allowed" : "pointer",
-                  }}
-                >
-                  <X size={22} />
-                </button>
-              </div>
-
-              {/* Editor body */}
-              <div
-                style={{
-                  padding: 0,
-                  overflowY: "auto",
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                <input
-                  type="text"
-                  placeholder="Post Title..."
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                  disabled={isSubmitting}
-                  style={{
-                    width: "100%",
-                    padding: "16px 20px",
-                    backgroundColor: "transparent",
-                    border: "none",
-                    borderBottom: `1px solid ${borderColor}`,
-                    color: textColor,
-                    outline: "none",
-                    fontSize: "1.4rem",
-                    fontWeight: 800,
-                    fontFamily: "inherit",
-                  }}
-                />
-
-                <input
-                  type="text"
-                  placeholder="Add a subtitle..."
-                  value={subtitle}
-                  onChange={(event) => setSubtitle(event.target.value)}
-                  maxLength={300}
-                  disabled={isSubmitting}
-                  style={{
-                    width: "100%",
-                    padding: "10px 20px",
-                    backgroundColor: "transparent",
-                    border: "none",
-                    borderBottom: `1px solid ${borderColor}`,
-                    color: mutedText,
-                    outline: "none",
-                    fontSize: "0.95rem",
-                    fontWeight: 500,
-                    fontFamily: "inherit",
-                  }}
-                />
-
-                <div style={{ padding: "16px 20px" }}>
-                  {/* AI Post Assistant */}
-                  <div
-                    style={{
-                      margin: "12px 20px 0",
-                      padding: "14px",
-                      border: `1px solid ${borderColor}`,
-                      borderRadius: "12px",
-                      background: isDark
-                        ? "rgba(99, 102, 241, 0.08)"
-                        : "rgba(99, 102, 241, 0.04)",
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setIsAiOpen((open) => !open)}
-                      aria-expanded={isAiOpen}
-                      disabled={isSubmitting}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        width: "100%",
-                        background: "transparent",
-                        border: "none",
-                        color: textColor,
-                        cursor: "pointer",
-                        fontWeight: 700,
-                        textAlign: "left",
-                      }}
-                    >
-                      <Sparkles size={18} color={accentColor} />
-                      AI Post Assistant
-                      <span
-                        style={{
-                          marginLeft: "auto",
-                          fontSize: "0.8rem",
-                          color: mutedText,
-                        }}
-                      >
-                        {isAiOpen ? "Hide" : "Generate suggestions"}
-                      </span>
-                    </button>
-
-                    {isAiOpen && (
-                      <div style={{ marginTop: "14px" }}>
-                        <label
-                          htmlFor="ai-post-instruction"
-                          style={{
-                            display: "block",
-                            marginBottom: "6px",
-                            color: mutedText,
-                            fontSize: "0.85rem",
-                          }}
-                        >
-                          Optional instructions
-                        </label>
-
-                        <textarea
-                          id="ai-post-instruction"
-                          value={aiInstruction}
-                          onChange={(event) =>
-                            setAiInstruction(event.target.value)
-                          }
-                          maxLength={1000}
-                          rows={2}
-                          placeholder="e.g. Make it beginner-friendly with practical examples"
-                          disabled={isAiLoading || isSubmitting}
-                          style={{
-                            width: "100%",
-                            boxSizing: "border-box",
-                            resize: "vertical",
-                            padding: "10px",
-                            borderRadius: "8px",
-                            border: `1px solid ${borderColor}`,
-                            background: inputBg,
-                            color: textColor,
-                            font: "inherit",
-                            fontSize: "0.9rem",
-                          }}
-                        />
-
-                        <button
-                          type="button"
-                          onClick={handleGenerateAiSuggestions}
-                          disabled={isAiLoading || isSubmitting}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "8px",
-                            marginTop: "10px",
-                            padding: "9px 14px",
-                            border: "none",
-                            borderRadius: "8px",
-                            background: accentColor,
-                            color: "#fff",
-                            fontWeight: 600,
-                            cursor:
-                              isAiLoading || isSubmitting
-                                ? "not-allowed"
-                                : "pointer",
-                            opacity: isAiLoading || isSubmitting ? 0.7 : 1,
-                          }}
-                        >
-                          {isAiLoading ? (
-                            <Loader2 size={16} className="animate-spin" />
-                          ) : (
-                            <Sparkles size={16} />
-                          )}
-                          {isAiLoading
-                            ? "Generating..."
-                            : "Generate suggestions"}
-                        </button>
-
-                        {aiResult && (
-                          <div
-                            style={{
-                              marginTop: "16px",
-                              display: "grid",
-                              gap: "14px",
-                            }}
-                          >
-                            {/* Suggested title */}
-                            <div>
-                              <strong style={{ color: textColor }}>
-                                Suggested title
-                              </strong>
-                              <p
-                                style={{
-                                  color: mutedText,
-                                  margin: "6px 0 8px",
-                                  overflowWrap: "anywhere",
-                                }}
-                              >
-                                {aiResult.suggestedTitle}
-                              </p>
-
-                              <button
-                                type="button"
-                                disabled={isSubmitting}
-                                onClick={() => {
-                                  setTitle(aiResult.suggestedTitle);
-                                  toast.success("Suggested title applied.");
-                                }}
-                                style={{
-                                  border: `1px solid ${borderColor}`,
-                                  borderRadius: "7px",
-                                  padding: "6px 10px",
-                                  background: "transparent",
-                                  color: textColor,
-                                  cursor: "pointer",
-                                }}
-                              >
-                                Apply title
-                              </button>
-                            </div>
-
-                            {/* Suggested summary */}
-                            <div>
-                              <strong style={{ color: textColor }}>
-                                Summary
-                              </strong>
-                              <p
-                                style={{
-                                  color: mutedText,
-                                  margin: "6px 0 8px",
-                                  lineHeight: 1.6,
-                                  overflowWrap: "anywhere",
-                                }}
-                              >
-                                {aiResult.summary}
-                              </p>
-
-                              <button
-                                type="button"
-                                disabled={isSubmitting || !editor}
-                                onClick={() => {
-                                  if (!editor) return;
-
-                                  editor
-                                    .chain()
-                                    .focus()
-                                    .insertContent({
-                                      type: "paragraph",
-                                      content: [
-                                        {
-                                          type: "text",
-                                          text: aiResult.summary,
-                                        },
-                                      ],
-                                    })
-                                    .run();
-
-                                  toast.success(
-                                    "Summary inserted into your post.",
-                                  );
-                                }}
-                                style={{
-                                  border: `1px solid ${borderColor}`,
-                                  borderRadius: "7px",
-                                  padding: "6px 10px",
-                                  background: "transparent",
-                                  color: textColor,
-                                  cursor: "pointer",
-                                }}
-                              >
-                                Insert summary
-                              </button>
-                            </div>
-
-                            {/* Suggested topics */}
-                            <div>
-                              <strong style={{ color: textColor }}>
-                                Suggested topics
-                              </strong>
-
-                              <div
-                                style={{
-                                  display: "flex",
-                                  flexWrap: "wrap",
-                                  gap: "6px",
-                                  margin: "8px 0",
-                                }}
-                              >
-                                {aiResult.topics.map((topic, index) => (
-                                  <span
-                                    key={`${topic}-${index}`}
-                                    style={{
-                                      padding: "5px 9px",
-                                      borderRadius: "16px",
-                                      background: `${accentColor}20`,
-                                      color: accentColor,
-                                      fontSize: "0.8rem",
-                                    }}
-                                  >
-                                    #{topic.replace(/^#+/, "")}
-                                  </span>
-                                ))}
-                              </div>
-
-                              <button
-                                type="button"
-                                disabled={isSubmitting}
-                                onClick={() => {
-                                  const normalizedTopics = aiResult.topics
-                                    .map((topic) =>
-                                      topic.trim().replace(/^#+/, ""),
-                                    )
-                                    .filter(Boolean);
-
-                                  const mergedTopics = Array.from(
-                                    new Set([...tags, ...normalizedTopics]),
-                                  );
-
-                                  setTags(mergedTopics.slice(0, 5));
-
-                                  if (mergedTopics.length > 5) {
-                                    toast.info(
-                                      "Only five tags are allowed. Some suggestions were skipped.",
-                                    );
-                                  } else if (
-                                    mergedTopics.length > tags.length
-                                  ) {
-                                    toast.success("Suggested topics added.");
-                                  } else {
-                                    toast.info(
-                                      "These topics are already added.",
-                                    );
-                                  }
-                                }}
-                                style={{
-                                  border: `1px solid ${borderColor}`,
-                                  borderRadius: "7px",
-                                  padding: "6px 10px",
-                                  background: "transparent",
-                                  color: textColor,
-                                  cursor: "pointer",
-                                }}
-                              >
-                                Add topics
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  <div
-                    style={{ minHeight: "100px", cursor: "text" }}
-                    onClick={() => editor?.commands.focus()}
-                  >
-                    {editor && <EditorContent editor={editor} />}
-                  </div>
-
-                  {/* Cover image */}
-                  {bannerPreview && (
-                    <div
-                      style={{
-                        marginTop: "16px",
-                        position: "relative",
-                        borderRadius: "8px",
-                        overflow: "hidden",
-                        border: `1px solid ${borderColor}`,
-                      }}
-                    >
-                      <img
-                        src={bannerPreview}
-                        alt="Cover preview"
-                        style={{
-                          width: "100%",
-                          height: "180px",
-                          objectFit: "cover",
-                          display: "block",
-                        }}
-                      />
-
-                      <button
-                        type="button"
-                        disabled={isSubmitting}
-                        aria-label="Remove cover image"
-                        onClick={() => {
-                          if (bannerPreview && bannerFile) {
-                            URL.revokeObjectURL(bannerPreview);
-                          }
-
-                          setBannerFile(null);
-                          setBannerPreview(editPost?.coverImageUrl || null);
-                        }}
-                        style={{
-                          position: "absolute",
-                          top: "8px",
-                          right: "8px",
-                          background: "rgba(0,0,0,0.6)",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: "50%",
-                          width: "28px",
-                          height: "28px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Code snippets */}
-                  {codeSnippets.map((snippet) => (
-                    <div
-                      key={snippet.id}
-                      style={{
-                        borderRadius: "8px",
-                        overflow: "hidden",
-                        border: `1px solid ${borderColor}`,
-                        marginTop: "16px",
-                        backgroundColor: isDark ? "#0d1117" : "#f8fafc",
-                        boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          padding: "8px 12px",
-                          borderBottom: `1px solid ${borderColor}`,
-                        }}
-                      >
-                        <div style={{ display: "flex", gap: "6px" }}>
-                          {["#ff5f56", "#ffbd2e", "#27c93f"].map((color) => (
-                            <div
-                              key={color}
-                              style={{
-                                width: 10,
-                                height: 10,
-                                borderRadius: "50%",
-                                backgroundColor: color,
-                              }}
-                            />
-                          ))}
-                        </div>
-
-                        <select
-                          aria-label="Code language"
-                          value={snippet.language}
-                          disabled={isSubmitting}
-                          onChange={(event) =>
-                            setCodeSnippets((previous) =>
-                              previous.map((item) =>
-                                item.id === snippet.id
-                                  ? {
-                                      ...item,
-                                      language: event.target.value,
-                                    }
-                                  : item,
-                              ),
-                            )
-                          }
-                          style={{
-                            backgroundColor: "transparent",
-                            color: mutedText,
-                            border: "none",
-                            outline: "none",
-                            fontSize: "0.8rem",
-                            fontWeight: 600,
-                            cursor: "pointer",
-                          }}
-                        >
-                          <option value="python">Python</option>
-                          <option value="typescript">TypeScript</option>
-                          <option value="javascript">JavaScript</option>
-                          <option value="rust">Rust</option>
-                          <option value="go">Go</option>
-                          <option value="cpp">C / C++</option>
-                          <option value="java">Java</option>
-                          <option value="sql">SQL</option>
-                        </select>
-
-                        <button
-                          type="button"
-                          disabled={isSubmitting}
-                          aria-label="Remove code snippet"
-                          onClick={() =>
-                            setCodeSnippets((previous) =>
-                              previous.filter((item) => item.id !== snippet.id),
-                            )
-                          }
-                          style={{
-                            background: "none",
-                            border: "none",
-                            color: "#ef4444",
-                            cursor: "pointer",
-                          }}
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-
-                      <CodeMirror
-                        value={snippet.code}
-                        height="auto"
-                        minHeight="80px"
-                        maxHeight="300px"
-                        theme={isDark ? vscodeDark : githubLight}
-                        extensions={getLanguageExtension(snippet.language)}
-                        onChange={(value) =>
-                          setCodeSnippets((previous) =>
-                            previous.map((item) =>
-                              item.id === snippet.id
-                                ? { ...item, code: value }
-                                : item,
-                            ),
-                          )
-                        }
-                      />
-                    </div>
-                  ))}
-
-                  {/* Existing and newly uploaded media */}
-                  {(existingMedia.length > 0 || mediaPreviews.length > 0) && (
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "10px",
-                        marginTop: "16px",
-                        overflowX: "auto",
-                        paddingBottom: "8px",
-                      }}
-                    >
-                      {existingMedia.map((url, index) => (
-                        <div
-                          key={`existing-${url}-${index}`}
-                          style={{
-                            position: "relative",
-                            flexShrink: 0,
-                            width: "120px",
-                            height: "120px",
-                            borderRadius: "8px",
-                            overflow: "hidden",
-                            border: `1px solid ${borderColor}`,
-                          }}
-                        >
-                          <img
-                            src={url}
-                            alt={`Existing media ${index + 1}`}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                              backgroundColor: isDark ? "#000" : "#f1f5f9",
-                            }}
-                          />
-
-                          <button
-                            type="button"
-                            disabled={isSubmitting}
-                            aria-label="Remove existing image"
-                            onClick={() => removeExistingMedia(index)}
-                            style={{
-                              position: "absolute",
-                              top: "4px",
-                              right: "4px",
-                              background: "rgba(0,0,0,0.6)",
-                              color: "#fff",
-                              border: "none",
-                              borderRadius: "50%",
-                              width: "20px",
-                              height: "20px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              cursor: "pointer",
-                            }}
-                          >
-                            <X size={12} />
-                          </button>
-                        </div>
-                      ))}
-
-                      {mediaPreviews.map((preview, index) => (
-                        <div
-                          key={`new-${preview}`}
-                          style={{
-                            position: "relative",
-                            flexShrink: 0,
-                            width: "120px",
-                            height: "120px",
-                            borderRadius: "8px",
-                            overflow: "hidden",
-                            border: `1px solid ${borderColor}`,
-                          }}
-                        >
-                          <img
-                            src={preview}
-                            alt={`New media ${index + 1}`}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                              backgroundColor: isDark ? "#000" : "#f1f5f9",
-                            }}
-                          />
-
-                          <button
-                            type="button"
-                            disabled={isSubmitting}
-                            aria-label="Remove uploaded image"
-                            onClick={() => removeNewMedia(index)}
-                            style={{
-                              position: "absolute",
-                              top: "4px",
-                              right: "4px",
-                              background: "rgba(0,0,0,0.6)",
-                              color: "#fff",
-                              border: "none",
-                              borderRadius: "50%",
-                              width: "20px",
-                              height: "20px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              cursor: "pointer",
-                            }}
-                          >
-                            <X size={12} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Tags */}
-                  <div
-                    style={{
-                      marginTop: "24px",
-                      paddingTop: "16px",
-                      borderTop: `1px solid ${borderColor}`,
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                        gap: "8px",
-                      }}
-                    >
-                      <Hash size={16} color={mutedText} />
-
-                      {tags.map((tag) => (
-                        <span
-                          key={tag}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            backgroundColor: `${accentColor}20`,
-                            color: accentColor,
-                            padding: "4px 10px",
-                            borderRadius: "16px",
-                            fontSize: "0.8rem",
-                            fontWeight: 600,
-                          }}
-                        >
-                          #{tag}
-                          <button
-                            type="button"
-                            disabled={isSubmitting}
-                            aria-label={`Remove tag ${tag}`}
-                            onClick={() => removeTag(tag)}
-                            style={{
-                              background: "none",
-                              border: "none",
-                              color: accentColor,
-                              cursor: "pointer",
-                              padding: 0,
-                              display: "flex",
-                            }}
-                          >
-                            <X size={12} />
-                          </button>
-                        </span>
-                      ))}
-
-                      {tags.length < 5 && (
-                        <input
-                          type="text"
-                          placeholder={
-                            tags.length === 0
-                              ? "Add tags (e.g. javascript)..."
-                              : "Add another tag..."
-                          }
-                          value={tagInput}
-                          disabled={isSubmitting}
-                          onChange={(event) => setTagInput(event.target.value)}
-                          onKeyDown={handleTagKeyDown}
-                          style={{
-                            border: "none",
-                            background: "transparent",
-                            color: textColor,
-                            outline: "none",
-                            fontSize: "0.85rem",
-                            minWidth: "120px",
-                            flex: 1,
-                          }}
-                        />
-                      )}
-                    </div>
-
-                    {tags.length === 0 && (
-                      <span
-                        style={{
-                          fontSize: "0.7rem",
-                          color: mutedText,
-                          marginLeft: "24px",
-                        }}
-                      >
-                        Press Enter or comma to add
-                      </span>
-                    )}
-                  </div>
+              <div>
+                <h2 className="text-sm font-bold text-[#0B192C] dark:text-white">{authUser?.fullname || "User"}</h2>
+                <div className="flex items-center gap-1 text-[11px] font-medium text-stone-500 dark:text-stone-400">
+                  {isEditMode ? "Editing..." : draftStatus === "Saved" ? <><CheckCircle size={12} className="text-green-500" /> Saved</> : draftStatus || "Draft"}
                 </div>
               </div>
+            </div>
+            <button onClick={handleDiscard} disabled={isSubmitting} className="rounded-full p-1.5 text-stone-400 hover:bg-stone-100 dark:hover:bg-white/5 transition-colors">
+              <X size={18} />
+            </button>
+          </div>
 
-              {/* Scheduling controls */}
-              {postStatus === "scheduled" && (
-                <div
-                  style={{
-                    padding: "12px 20px 0",
-                  }}
+          {/* ================= SCROLLABLE BODY ================= */}
+          <div className="flex-1 overflow-y-auto scrollbar-hide px-6 py-6 sm:px-10">
+            <div className="mx-auto w-full max-w-2xl">
+              
+              {/* Title & Subtitle */}
+              <input
+                type="text"
+                placeholder="Post Title..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                disabled={isSubmitting}
+                className="w-full bg-transparent border-none text-3xl font-extrabold text-[#0B192C] placeholder-stone-300 outline-none dark:text-white dark:placeholder-stone-600 mb-2"
+              />
+              <input
+                type="text"
+                placeholder="Add a subtitle (optional)..."
+                value={subtitle}
+                onChange={(e) => setSubtitle(e.target.value)}
+                maxLength={300}
+                disabled={isSubmitting}
+                className="w-full bg-transparent border-none text-base text-stone-500 placeholder-stone-400 outline-none dark:text-stone-400 dark:placeholder-stone-500 mb-6"
+              />
+
+              {/* AI Assistant Collapsible Panel */}
+              <div className="mb-6 rounded-xl border border-orange-500/20 bg-orange-50/50 dark:border-orange-500/20 dark:bg-orange-500/5">
+                <button
+                  type="button"
+                  onClick={() => setIsAiOpen(!isAiOpen)}
+                  disabled={isSubmitting}
+                  className="flex w-full items-center justify-between p-3"
                 >
-                  <label
-                    htmlFor="scheduled-at"
-                    style={{
-                      display: "block",
-                      fontSize: "0.8rem",
-                      fontWeight: 600,
-                      color: mutedText,
-                      marginBottom: "6px",
-                    }}
-                  >
-                    Schedule publication
-                  </label>
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-md bg-orange-500 text-white shadow-sm">
+                      <Sparkles size={14} />
+                    </div>
+                    <span className="text-sm font-bold text-[#0B192C] dark:text-white">AI Assistant</span>
+                  </div>
+                  <ChevronDown size={16} className={`text-orange-500 transition-transform ${isAiOpen ? "rotate-180" : ""}`} />
+                </button>
 
-                  <input
-                    id="scheduled-at"
-                    type="datetime-local"
-                    value={scheduledAt}
-                    onChange={(event) => setScheduledAt(event.target.value)}
-                    min={new Date().toISOString().slice(0, 16)}
-                    disabled={isSubmitting}
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      borderRadius: "8px",
-                      border: `1px solid ${borderColor}`,
-                      backgroundColor: inputBg,
-                      color: textColor,
-                      outline: "none",
-                      fontFamily: "inherit",
+                {isAiOpen && (
+                  <div className="px-3 pb-3">
+                    <textarea
+                      value={aiInstruction}
+                      onChange={(e) => setAiInstruction(e.target.value)}
+                      maxLength={1000}
+                      rows={2}
+                      placeholder="e.g. Make it beginner friendly with examples..."
+                      disabled={isAiLoading || isSubmitting}
+                      className="w-full resize-none rounded-lg border border-stone-200 bg-white p-2.5 text-sm text-stone-800 outline-none focus:border-orange-500/50 dark:border-white/10 dark:bg-[#0B192C] dark:text-white mb-2"
+                    />
+                    <button
+                      onClick={handleGenerateAiSuggestions}
+                      disabled={isAiLoading || isSubmitting}
+                      className="flex items-center gap-2 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-orange-600 disabled:opacity-50"
+                    >
+                      {isAiLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                      Generate
+                    </button>
+
+                    {aiResult && (
+                      <div className="mt-4 space-y-4 rounded-lg bg-white/50 p-3 dark:bg-black/20">
+                        <div>
+                          <strong className="text-xs font-bold text-stone-700 dark:text-stone-300">Suggested Title</strong>
+                          <p className="mt-1 mb-2 text-sm text-stone-800 dark:text-white">{aiResult.suggestedTitle}</p>
+                          <button onClick={() => { setTitle(aiResult.suggestedTitle); toast.success("Title applied"); }} className="text-xs font-semibold text-orange-500 hover:underline">Apply title</button>
+                        </div>
+                        <div>
+                          <strong className="text-xs font-bold text-stone-700 dark:text-stone-300">Summary</strong>
+                          <p className="mt-1 mb-2 text-sm text-stone-800 dark:text-white">{aiResult.summary}</p>
+                          <button onClick={() => { editor?.chain().focus().insertContent({ type: 'paragraph', content: [{ type: 'text', text: aiResult.summary }] }).run(); toast.success("Summary inserted"); }} className="text-xs font-semibold text-orange-500 hover:underline">Insert summary</button>
+                        </div>
+                        <div>
+                          <strong className="text-xs font-bold text-stone-700 dark:text-stone-300">Suggested Topics</strong>
+                          <div className="mt-1 mb-2 flex flex-wrap gap-2">
+                            {aiResult.topics.map((topic, i) => (
+                              <span key={i} className="rounded-full bg-orange-100 text-orange-600 px-2 py-1 text-xs dark:bg-orange-500/20 dark:text-orange-400">#{topic.replace(/^#+/, "")}</span>
+                            ))}
+                          </div>
+                          <button onClick={() => { const merged = Array.from(new Set([...tags, ...aiResult.topics.map(t => t.replace(/^#+/, ""))])); setTags(merged.slice(0,5)); toast.success("Topics added"); }} className="text-xs font-semibold text-orange-500 hover:underline">Add topics</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Tiptap Editor */}
+              <div className="min-h-[200px] cursor-text" onClick={() => editor?.commands.focus()}>
+                {editor && <EditorContent editor={editor} />}
+              </div>
+
+              {/* Cover Image Preview */}
+              {bannerPreview && (
+                <div className="relative mt-4 overflow-hidden rounded-xl border border-stone-200 dark:border-white/10">
+                  <img src={bannerPreview} alt="Cover" className="block h-[150px] w-full object-cover" />
+                  <button
+                    onClick={() => {
+                      if (bannerPreview && bannerFile) URL.revokeObjectURL(bannerPreview);
+                      setBannerFile(null);
+                      setBannerPreview(editPost?.coverImageUrl || null);
                     }}
-                  />
+                    className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+                  >
+                    <X size={14} />
+                  </button>
                 </div>
               )}
 
-              {/* Modal footer */}
-              <div
-                style={{
-                  padding: "1rem",
-                  borderTop: `1px solid ${borderColor}`,
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: "12px",
-                  flexWrap: "wrap",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "10px",
-                    alignItems: "center",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <button
-                    type="button"
-                    aria-label="Bold"
-                    disabled={isSubmitting}
-                    onClick={() => editor?.chain().focus().toggleBold().run()}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: editor?.isActive("bold") ? accentColor : mutedText,
-                      cursor: "pointer",
-                    }}
-                  >
-                    <Bold size={18} />
-                  </button>
-
-                  <button
-                    type="button"
-                    aria-label="Italic"
-                    disabled={isSubmitting}
-                    onClick={() => editor?.chain().focus().toggleItalic().run()}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: editor?.isActive("italic")
-                        ? accentColor
-                        : mutedText,
-                      cursor: "pointer",
-                    }}
-                  >
-                    <Italic size={18} />
-                  </button>
-
-                  <button
-                    type="button"
-                    aria-label="Add link"
-                    disabled={isSubmitting}
-                    onClick={() => {
-                      const url = window.prompt("Enter URL:");
-
-                      if (url && editor) {
-                        editor.chain().focus().setLink({ href: url }).run();
-                      } else if (url === "") {
-                        editor?.chain().focus().unsetLink().run();
-                      }
-                    }}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: editor?.isActive("link") ? linkColor : mutedText,
-                      cursor: "pointer",
-                    }}
-                  >
-                    <LinkIcon size={18} />
-                  </button>
-
-                  <div
-                    style={{
-                      width: "1px",
-                      height: "20px",
-                      backgroundColor: borderColor,
-                      margin: "0 4px",
-                    }}
+              {/* Code Snippets */}
+              {codeSnippets.map((snippet) => (
+                <div key={snippet.id} className="mt-4 overflow-hidden rounded-xl border border-stone-800 bg-[#161312] dark:border-white/10">
+                  <div className="flex items-center justify-between border-b border-stone-800 px-4 py-2">
+                    <div className="flex gap-1.5">
+                      <div className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-yellow-500/80" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-green-500/80" />
+                    </div>
+                    <select
+                      value={snippet.language}
+                      onChange={(e) => setCodeSnippets(prev => prev.map(item => item.id === snippet.id ? { ...item, language: e.target.value } : item))}
+                      className="bg-transparent text-xs font-semibold text-stone-400 outline-none cursor-pointer"
+                    >
+                      <option value="python">Python</option>
+                      <option value="typescript">TypeScript</option>
+                      <option value="javascript">JavaScript</option>
+                      <option value="rust">Rust</option>
+                      <option value="go">Go</option>
+                      <option value="cpp">C / C++</option>
+                      <option value="java">Java</option>
+                      <option value="sql">SQL</option>
+                    </select>
+                    <button onClick={() => setCodeSnippets(prev => prev.filter(item => item.id !== snippet.id))} className="text-red-400 hover:text-red-300">
+                      <X size={16} />
+                    </button>
+                  </div>
+                  <CodeMirror
+                    value={snippet.code}
+                    height="auto"
+                    minHeight="100px"
+                    maxHeight="300px"
+                    theme={isDark ? vscodeDark : githubLight}
+                    extensions={getLanguageExtension(snippet.language)}
+                    onChange={(value) => setCodeSnippets(prev => prev.map(item => item.id === snippet.id ? { ...item, code: value } : item))}
                   />
-
-                  <input
-                    type="file"
-                    id="banner-image-upload"
-                    accept="image/jpeg,image/png,image/gif,image/webp"
-                    disabled={isSubmitting}
-                    style={{ display: "none" }}
-                    onChange={handleBannerUpload}
-                  />
-
-                  <label
-                    htmlFor="banner-image-upload"
-                    title="Set cover image"
-                    style={{
-                      cursor: isSubmitting ? "not-allowed" : "pointer",
-                      color:
-                        bannerFile || editPost?.coverImageUrl
-                          ? accentColor
-                          : mutedText,
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    <ImageIcon size={20} />
-                  </label>
-
-                  <input
-                    type="file"
-                    id="modal-image-upload"
-                    accept="image/*"
-                    multiple
-                    disabled={isSubmitting}
-                    style={{ display: "none" }}
-                    onChange={handleMediaUpload}
-                  />
-
-                  <label
-                    htmlFor="modal-image-upload"
-                    title="Attach images"
-                    style={{
-                      cursor: isSubmitting ? "not-allowed" : "pointer",
-                      color: mutedText,
-                    }}
-                  >
-                    <ImageIcon size={20} />
-                  </label>
-
-                  <button
-                    type="button"
-                    aria-label="Add code snippet"
-                    disabled={isSubmitting}
-                    onClick={addCodeSnippet}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: mutedText,
-                      cursor: "pointer",
-                    }}
-                  >
-                    <CodeXml size={20} />
-                  </button>
                 </div>
+              ))}
 
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <select
-                    aria-label="Post status"
-                    value={postStatus}
-                    disabled={isSubmitting}
-                    onChange={(event) => {
-                      const newStatus = event.target.value as
-                        | "draft"
-                        | "scheduled"
-                        | "published";
-
-                      setPostStatus(newStatus);
-
-                      if (newStatus !== "scheduled") {
-                        setScheduledAt("");
-                      }
-                    }}
-                    style={{
-                      backgroundColor: inputBg,
-                      color: textColor,
-                      border: `1px solid ${borderColor}`,
-                      borderRadius: "8px",
-                      padding: "8px 10px",
-                      outline: "none",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="scheduled">Schedule</option>
-                    <option value="published">Publish</option>
-                  </select>
-
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
-                    style={{
-                      backgroundColor: accentColor,
-                      color: "#fff",
-                      border: "none",
-                      padding: "8px 24px",
-                      borderRadius: "24px",
-                      fontWeight: 600,
-                      cursor: isSubmitting ? "not-allowed" : "pointer",
-                      opacity: isSubmitting ? 0.5 : 1,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    {isSubmitting ? (
-                      <Loader2 size={16} className="animate-spin" />
-                    ) : (
-                      <>
-                        {postStatus === "draft"
-                          ? "Save Draft"
-                          : postStatus === "scheduled"
-                            ? "Schedule"
-                            : isEditMode
-                              ? "Save Changes"
-                              : "Publish"}
-
-                        {postStatus === "draft" ? (
-                          <Save size={16} />
-                        ) : (
-                          <Send size={16} />
-                        )}
-                      </>
-                    )}
-                  </button>
+              {/* Media Previews */}
+              {(existingMedia.length > 0 || mediaPreviews.length > 0) && (
+                <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
+                  {existingMedia.map((url, i) => (
+                    <div key={`exist-${i}`} className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-stone-200 dark:border-white/10">
+                      <img src={url} alt="media" className="h-full w-full object-cover" />
+                      <button onClick={() => removeExistingMedia(i)} className="absolute right-1 top-1 rounded-full bg-black/60 p-0.5 text-white"><X size={12} /></button>
+                    </div>
+                  ))}
+                  {mediaPreviews.map((url, i) => (
+                    <div key={`new-${i}`} className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-stone-200 dark:border-white/10">
+                      <img src={url} alt="media" className="h-full w-full object-cover" />
+                      <button onClick={() => removeNewMedia(i)} className="absolute right-1 top-1 rounded-full bg-black/60 p-0.5 text-white"><X size={12} /></button>
+                    </div>
+                  ))}
                 </div>
+              )}
+
+              {/* Tags */}
+              <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-stone-200/60 pt-4 dark:border-white/10">
+                <Hash size={16} className="text-stone-400" />
+                {tags.map((tag) => (
+                  <span key={tag} className="flex items-center gap-1 rounded-md bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-600 dark:bg-orange-500/10 dark:text-orange-400">
+                    #{tag}
+                    <button onClick={() => removeTag(tag)}><X size={12} /></button>
+                  </span>
+                ))}
+                {tags.length < 5 && (
+                  <input
+                    type="text"
+                    placeholder={tags.length === 0 ? "Add tags (e.g. javascript)..." : "Add another..."}
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={handleTagKeyDown}
+                    disabled={isSubmitting}
+                    className="min-w-[100px] flex-1 bg-transparent text-sm outline-none placeholder-stone-400 dark:text-white"
+                  />
+                )}
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+
+            </div>
+          </div>
+
+          {/* ================= FOOTER ================= */}
+          <div className="shrink-0 border-t border-stone-200/60 bg-white/80 px-5 py-3 backdrop-blur-md dark:border-white/10 dark:bg-[#15233B]/80">
+            <div className="mx-auto flex max-w-3xl items-center justify-between gap-4">
+              
+              {/* Toolbar Icons */}
+              <div className="flex items-center gap-0.5 text-stone-400">
+                <button onClick={() => editor?.chain().focus().toggleBold().run()} disabled={isSubmitting} className={`p-1.5 rounded-md hover:bg-stone-100 dark:hover:bg-white/10 ${editor?.isActive('bold') ? 'text-orange-500' : ''}`}><Bold size={16} /></button>
+                <button onClick={() => editor?.chain().focus().toggleItalic().run()} disabled={isSubmitting} className={`p-1.5 rounded-md hover:bg-stone-100 dark:hover:bg-white/10 ${editor?.isActive('italic') ? 'text-orange-500' : ''}`}><Italic size={16} /></button>
+                <button onClick={() => { const url = window.prompt("URL:"); if (url && editor) editor.chain().focus().setLink({ href: url }).run(); }} disabled={isSubmitting} className={`p-1.5 rounded-md hover:bg-stone-100 dark:hover:bg-white/10 ${editor?.isActive('link') ? 'text-orange-500' : ''}`}><LinkIcon size={16} /></button>
+                <div className="mx-1.5 h-4 w-px bg-stone-300 dark:bg-white/20" />
+                <label htmlFor="banner-up" className="cursor-pointer p-1.5 rounded-md hover:bg-stone-100 dark:hover:bg-white/10"><ImageIcon size={16} /></label>
+                <input type="file" id="banner-up" className="hidden" accept="image/*" onChange={handleBannerUpload} disabled={isSubmitting} />
+                <label htmlFor="media-up" className="cursor-pointer p-1.5 rounded-md hover:bg-stone-100 dark:hover:bg-white/10"><ImageIcon size={16} /></label>
+                <input type="file" id="media-up" className="hidden" accept="image/*" multiple onChange={handleMediaUpload} disabled={isSubmitting} />
+                <button onClick={addCodeSnippet} disabled={isSubmitting} className="p-1.5 rounded-md hover:bg-stone-100 dark:hover:bg-white/10"><CodeXml size={16} /></button>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                {postStatus === "scheduled" && (
+                  <input
+                    type="datetime-local"
+                    value={scheduledAt}
+                    onChange={(e) => setScheduledAt(e.target.value)}
+                    disabled={isSubmitting}
+                    className="rounded-lg border border-stone-200 bg-white px-2 py-1.5 text-xs font-medium text-stone-700 outline-none dark:border-white/10 dark:bg-[#0B192C] dark:text-white"
+                  />
+                )}
+                <select
+                  value={postStatus}
+                  onChange={(e) => {
+                    const val = e.target.value as "draft" | "scheduled" | "published";
+                    setPostStatus(val);
+                    if (val !== "scheduled") setScheduledAt("");
+                  }}
+                  disabled={isSubmitting}
+                  className="rounded-lg border border-stone-200 bg-transparent px-3 py-1.5 text-xs font-semibold text-stone-700 outline-none dark:border-white/10 dark:text-stone-300"
+                >
+                  <option value="draft">Draft</option>
+                  <option value="scheduled">Schedule</option>
+                  <option value="published">Publish</option>
+                </select>
+                <button
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="flex items-center gap-1.5 rounded-lg bg-orange-500 px-5 py-1.5 text-xs font-bold text-white shadow-sm shadow-orange-500/20 transition-all hover:bg-orange-600 disabled:opacity-50"
+                >
+                  {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : (
+                    <>
+                      {postStatus === "draft" ? "Save Draft" : postStatus === "scheduled" ? "Schedule" : isEditMode ? "Save Changes" : "Publish"}
+                      {postStatus === "draft" ? <Save size={14} /> : <Send size={14} />}
+                    </>
+                  )}
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>,
+    document.body
   );
 };
 

@@ -1,11 +1,7 @@
 import { useCallback, useState } from "react";
-
 import { useAuth } from "@/app/providers/AuthProvider";
-import Footer from "@/components/layout/Footer";
-import ProfileSidebar from "@/features/users/components/profile/ProfileSidebar";
 import CreatePostEditor from "@/features/posts/components/CreatePostEditor";
 import PostsFeed from "@/features/posts/components/PostsFeed";
-import TrendingSidebar from "@/features/posts/components/TrendingSidebar";
 import type { Post } from "@/features/posts/types/post.types";
 
 export default function HomePage() {
@@ -32,36 +28,24 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-blue-50/40 dark:bg-slate-950">
-      <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
-          <aside className="hidden lg:col-span-3 lg:block">
-            <div className="sticky top-24">
-              <ProfileSidebar />
-            </div>
-          </aside>
+    <div className="flex flex-col h-full">
+      
+      {/* 1. POST COMPOSER  */}
+      <div className="shrink-0 pb-4">
+        <CreatePostEditor onPostCreated={handlePostCreated} />
+      </div>
 
-          <section className="min-w-0 space-y-6 lg:col-span-6">
-            <CreatePostEditor onPostCreated={handlePostCreated} />
+      {/* 2. POSTS FEED  */}
+      <div className="flex-1 overflow-y-auto scrollbar-hide pb-10">
+        <PostsFeed
+          currentUserId={user?.id}
+          refreshKey={refreshKey}
+          onEditPost={handleEditPost}
+          emptyMessage="No published posts yet. Be the first to share something!"
+        />
+      </div>
 
-            <PostsFeed
-              currentUserId={user?.id}
-              refreshKey={refreshKey}
-              onEditPost={handleEditPost}
-              emptyMessage="No published posts yet. Be the first to share something!"
-            />
-          </section>
-
-          <aside className="hidden lg:col-span-3 lg:block">
-            <div className="sticky top-24">
-              <TrendingSidebar />
-            </div>
-          </aside>
-        </div>
-      </main>
-
-      <Footer />
-
+      {/* Edit Modal */}
       {editingPost && (
         <CreatePostEditor
           key={editingPost.id}

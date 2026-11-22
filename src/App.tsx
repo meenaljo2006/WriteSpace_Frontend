@@ -17,12 +17,10 @@ import SavedPostsPage from "./pages/saved/SavedPostsPage";
 import NotificationsPage from "./pages/notifications/NotificationsPage";
 import MessagesPage from "./pages/messages/MessagesPage";
 
-// --- NAYE LANDING PAGE IMPORTS ---
 import PublicLayout from "./features/landing/layout/PublicLayout";
-import Landing from "./features/landing/pages/Landing"; // apne path ke hisaab se check kar lena
+import Landing from "./features/landing/pages/Landing"; 
 import Features from "./features/landing/pages/Features";
 import Community from "./features/landing/pages/Community";
-// --------------------------------
 
 // Context & Providers
 import { ThemeProvider, useTheme } from "@/app/providers/ThemeProvider";
@@ -44,12 +42,11 @@ const PublicRoute: React.FC<RouteProps> = ({ children }) => {
   if (isLoadingAuth) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-        <Loader2 size={40} className="animate-spin text-[#6366f1]" />
+        <Loader2 size={40} className="animate-spin text-orange-500" />
       </div>
     );
   }
   
-  // Agar user pehle se login hai, to use landing page ya login page se hata kar /home bhej do
   return isAuthenticated ? <Navigate to="/home" replace /> : <>{children}</>;
 };
 
@@ -67,7 +64,7 @@ const AppContent: React.FC = () => {
       />
       
       <Routes>
-        {/* --- NAYA: PUBLIC LANDING PAGES (Navbar + Footer ke sath) --- */}
+        {/*PUBLIC LANDING PAGES*/}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
           <Route path="/features" element={<PublicRoute><Features /></PublicRoute>} />
@@ -96,7 +93,7 @@ const AppContent: React.FC = () => {
         
         <Route path="/auth/success" element={<OAuthSuccess />} />
 
-        {/* --- Completely Protected App Area --- */}
+        {/* --- Protected Area --- */}
         <Route path="/profile/:username" element={<PublicProfileLayout />}>
           <Route index element={<Profile />} />
         </Route>
@@ -112,7 +109,7 @@ const AppContent: React.FC = () => {
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
         
-        {/* Fallback Route: Ab random URL pe /home nahi, balki Landing page (/) pe bhejenge */}
+        {/* Fallback Route */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

@@ -48,7 +48,6 @@ export default function PostDetailPage() {
               }
             })
             .catch((err: unknown) => {
-              // View tracking must never break the page.
               console.error("View tracking failed:", err);
             });
         }
@@ -85,47 +84,51 @@ export default function PostDetailPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-6 dark:bg-gray-950 sm:px-6">
+    <main className="w-full h-full bg-transparent pb-10">
       <div className="mx-auto w-full max-w-3xl">
+        
+        {/* Back Button  */}
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="mb-5 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-200 dark:text-gray-200 dark:hover:bg-gray-800"
+          className="mb-4 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-stone-500 transition-colors hover:text-orange-500 dark:text-stone-400 dark:hover:text-orange-400 "
         >
           <ArrowLeft size={18} />
           Back
         </button>
 
+        {/* Loading State */}
         {isLoading && (
           <div
-            className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white p-8 text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300"
+            className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-2xl border border-white/80 bg-white/70 p-8 text-stone-600 shadow-[0_8px_30px_rgb(249,115,22,0.06)] backdrop-blur-md dark:border-white/10 dark:bg-[#15233B]/70 dark:text-stone-300"
             role="status"
             aria-live="polite"
           >
-            <LoaderCircle size={30} className="animate-spin" />
-            <p>Loading post...</p>
+            <LoaderCircle size={30} className="animate-spin text-orange-500" />
+            <p className="font-medium">Loading post...</p>
           </div>
         )}
 
+        {/* Error State  */}
         {!isLoading && error && (
           <section
-            className="rounded-xl border border-red-200 bg-white p-6 text-center dark:border-red-900 dark:bg-gray-900"
+            className="rounded-2xl border border-red-500/20 bg-red-500/10 p-8 text-center backdrop-blur-md shadow-lg"
             role="alert"
           >
             <AlertCircle size={32} className="mx-auto mb-3 text-red-500" />
 
-            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h1 className="text-lg font-bold text-[#0B192C] dark:text-white">
               Unable to load this post
             </h1>
 
-            <p className="mt-2 wrap-break-words text-sm text-gray-600 dark:text-gray-300">
+            <p className="mt-2 wrap-break-words text-sm text-stone-600 dark:text-stone-300">
               {error}
             </p>
 
             <button
               type="button"
               onClick={() => setRetryKey((current) => current + 1)}
-              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-orange-500 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30"
             >
               <RefreshCw size={16} />
               Try again
@@ -133,6 +136,7 @@ export default function PostDetailPage() {
           </section>
         )}
 
+        {/* Post Content */}
         {!isLoading && !error && post && (
           <PostCard
             post={post}

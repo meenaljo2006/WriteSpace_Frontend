@@ -156,8 +156,8 @@ export default function PostCard({
 
   return (
     <article
-      className={`min-w-0 rounded-2xl border border-blue-100 bg-white shadow-sm transition-shadow dark:border-slate-800 dark:bg-slate-900 ${
-        isDetailView ? "p-4 sm:p-6" : "p-4 hover:shadow-md sm:p-5"
+      className={`min-w-0 rounded-2xl border border-white/80 dark:border-white/10 bg-white/70 dark:bg-[#15233B]/70 backdrop-blur-md shadow-[0_8px_30px_rgb(249,115,22,0.06)] transition-all ${
+        isDetailView ? "p-6 sm:p-8" : "p-4 hover:shadow-[0_8px_40px_rgb(249,115,22,0.12)] sm:p-5"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -191,7 +191,6 @@ export default function PostCard({
         />
 
         <PostMediaGallery post={post} />
-
         <PostCodeSnippets post={post} />
       </div>
 
@@ -219,7 +218,7 @@ export default function PostCard({
       {actionError && (
         <p
           role="alert"
-          className="mt-3 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
+          className="mt-3 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400"
         >
           {actionError}
         </p>
@@ -228,7 +227,7 @@ export default function PostCard({
       {showComments && (
         <div
           ref={commentsRef}
-          className="mt-4 border-t border-blue-100 pt-4 dark:border-slate-700"
+          className="mt-4 border-t border-stone-200/60 dark:border-white/10 pt-4"
         >
           <CommentSection
             postId={post.id}
